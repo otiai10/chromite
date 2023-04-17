@@ -1,0 +1,39 @@
+{
+  "name": "chromite",
+  "version": "0.0.1",
+  "description": "Chrome Extension Message-Routing toolkit",
+  "source": "src/index.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "watch": "parcel watch",
+    "build": "parcel build",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otiai10/chromite.git"
+  },
+  "keywords": [
+    "Chrome",
+    "Extension",
+    "runtime",
+    "sendMessage",
+    "routing"
+  ],
+  "author": "otiai10",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/otiai10/chromite/issues"
+  },
+  "homepage": "https://github.com/otiai10/chromite#readme",
+  "devDependencies": {
+    "@parcel/packager-ts": "^2.8.3",
+    "@parcel/transformer-typescript-tsc": "^2.8.3",
+    "@parcel/transformer-typescript-types": "^2.8.3",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "parcel": "latest",
+    "typescript": "^5.0.4"
+  }
+}
