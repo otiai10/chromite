@@ -2,13 +2,13 @@
   "name": "chromite",
   "version": "0.0.1",
   "description": "Chrome Extension Message-Routing toolkit",
-  "source": "src/index.ts",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "watch": "parcel watch",
     "build": "parcel build",
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "parcel build --target e2e && ts-node ./tests/e2e/runner.ts"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,25 @@
     "@types/jest": "^29.5.0",
     "jest": "^29.5.0",
     "parcel": "latest",
+    "puppeteer": "^19.9.1",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
+  },
+  "targets": {
+    "default": {
+      "source": "src/index.ts",
+      "distDir": "lib"
+    },
+    "e2e": {
+      "source": "tests/e2e/src/background.ts",
+      "distDir": "tests/e2e/dist",
+      "optimize": false,
+      "sourceMap": false
+    }
+  },
+  "jest": {
+    "testMatch": [
+      "**/tests/spec/**/*.spec.ts"
+    ]
   }
 }
