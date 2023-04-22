@@ -31,6 +31,7 @@
     "@parcel/packager-ts": "^2.8.3",
     "@parcel/transformer-typescript-tsc": "^2.8.3",
     "@parcel/transformer-typescript-types": "^2.8.3",
+    "@types/chrome": "^0.0.233",
     "@types/jest": "^29.5.0",
     "jest": "^29.5.0",
     "parcel": "latest",
@@ -44,8 +45,11 @@
       "distDir": "lib"
     },
     "e2e": {
-      "source": "tests/e2e/src/background.ts",
-      "distDir": "tests/e2e/dist",
+      "source": [
+        "tests/e2e/app/src/background.ts",
+        "tests/e2e/app/src/content.ts"
+      ],
+      "distDir": "tests/e2e/app/dist",
       "optimize": false,
       "sourceMap": false
     }

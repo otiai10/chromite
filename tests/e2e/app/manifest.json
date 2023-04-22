@@ -1,0 +1,23 @@
+{
+    "name": "E2E App Test Extension",
+    "version": "0.1",
+    "background": {
+        "service_worker": "dist/background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://example.com/*"
+            ],
+            "js": [
+                "dist/content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "permissions": [
+        "activeTab",
+        "scripting"
+    ],
+    "manifest_version": 3
+}
