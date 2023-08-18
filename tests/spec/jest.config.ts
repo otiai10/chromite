@@ -1,11 +1,10 @@
-import type { Config } from "jest";
-
-const config: Config = {
+const config = {
     testMatch: ["./**/*.spec.ts"],
     preset: "ts-jest",
-    globals: { // TODO: mock chrome
-        chrome: {},
-    },
+    setupFiles: ["./setup.ts"],
+    // globals: {
+    //     chrome,
+    // },
 };
 
 export default config;
