@@ -46,8 +46,8 @@ Specifically, it would look like this:
 const router = new Router();
 
 router.on("/users/list", ListUsersController);
-router.on("/users/:id", GetUserController);
-router.on("/users/:id/update", UpdateUserController);
+router.on("/users/{id}", GetUserController);
+router.on("/users/{id}/update", UpdateUserController);
 router.onNotFound(NotFoundController);
 
 chrome.runtime.onMessage.addListener(router.listener());
