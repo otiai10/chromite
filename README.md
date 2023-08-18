@@ -1,13 +1,14 @@
-# chromite
+# chromite - Chrome Extension Messaging Routing Kit
 
 [![Node.js CI](https://github.com/otiai10/chromite/actions/workflows/node-ci.yml/badge.svg)](https://github.com/otiai10/chromite/actions/workflows/node-ci.yml)
 [![Chrome E2E Test](https://github.com/otiai10/chromite/actions/workflows/e2e-test.yml/badge.svg)](https://github.com/otiai10/chromite/actions/workflows/e2e-test.yml)
 [![codecov](https://codecov.io/github/otiai10/chromite/branch/main/graph/badge.svg?token=wAWd6Vhy4j)](https://codecov.io/github/otiai10/chromite)
 
-Chrome Extension Messaging Routing Kit
 
 * Use `Router` to simplify your `onMessage` event listener routing
 * Use `Client` as a shorthand for `sendMessage`
+
+to write your Chrome Extension in the way of Web Application Development.
 
 # Why?
 
@@ -68,3 +69,37 @@ async function GetUserController(this: {id: string}, message, sender) {
     return { user };
 }
 ```
+
+this will make our life easier.
+
+Then simply you can send message to this listener like this:
+
+```javascript
+const users = await chrome.runtime.sendMessage({action: '/users/list'});
+// Nothing different to whant we do usually.
+```
+
+# Client
+
+In case you need some shorthand to send message, which might be a HTTP client in web application, there is `Client` you can use and you can avoid using `action` field in your message.
+
+```javascript
+const client = new Client(chrome.runtime);
+
+// path (=action) only
+const users = await client.send('/users/list');
+
+// path with request body
+const updated = await client.send(`/users/${id}/update`, {name: "otiai20"});
+```
+
+# ActiveRecord?
+
+Now you might want something like `ActiveRecord` to access and OR-mapping `chrome.storage`.
+There is a separated package: `jstorm` - JavaScript ORM for `chrome.storage` and `LocalStorage`.
+
+https://github.com/otiai10/jstorm
+
+# Issues
+
+- https://github.com/otiai10/chromite/issues/new
