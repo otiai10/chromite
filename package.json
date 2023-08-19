@@ -7,7 +7,7 @@
   "scripts": {
     "watch": "parcel watch",
     "build": "parcel build",
-    "test": "jest --config tests/spec/jest.config.ts",
+    "test": "jest --config jest.spec-config.ts",
     "test:e2e": "jest --config tests/e2e/jest.config.ts"
   },
   "repository": {

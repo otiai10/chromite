@@ -1,5 +1,5 @@
 import { chrome } from 'jest-chrome';
-import { Client, _ } from "../../src/client";
+import { Client, _ } from "../../src";
 
 describe("Client", () => {
     it("should be a class", () => {

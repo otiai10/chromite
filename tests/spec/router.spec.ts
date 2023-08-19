@@ -1,4 +1,4 @@
-import { Router } from "../../src/router";
+import { Router } from "../../src";
 
 describe("Router", () => {
     it("should be a class", () => {
