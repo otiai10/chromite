@@ -1,8 +1,10 @@
+
 const config = {
-    globalSetup: "./setup.js",
-    globalTeardown: "./teardown.js",
-    testEnvironment: "./puppeteer_environment.js",
-    testMatch: ["./**/*.spec.ts"],
+    rootDir: "../../",
+    globalSetup: "<rootDir>/tests/e2e/setup.js",
+    globalTeardown: "<rootDir>/tests/e2e/teardown.js",
+    testEnvironment: "<rootDir>/tests/e2e/puppeteer_environment.js",
+    testMatch: ["<rootDir>/tests/e2e/*.spec.ts"],
 };
 
 export default config;

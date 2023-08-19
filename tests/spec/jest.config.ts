@@ -1,11 +1,12 @@
 import { Config } from "@jest/types";
 
 const config: typeof Config = {
-    testMatch: ["**/tests/spec/*.spec.ts"],
+    rootDir: "../../",
+    testMatch: ["<rootDir>/tests/spec/*.spec.ts"],
     preset: "ts-jest",
-    setupFiles: ["./tests/spec/setup.ts"],
+    setupFiles: ["<rootDir>/tests/spec/setup.ts"],
     collectCoverageFrom: [
-        "./src/*.ts",
+        "<rootDir>/src/*.ts",
     ],
 };
 
