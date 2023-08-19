@@ -1,5 +1,7 @@
+import { ActionKey } from "./keys";
+
 export type Resolved<U = {}> = {
-    action: string;
+    [ActionKey]: string;
 } & U;
 
 type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never;
@@ -32,7 +34,7 @@ export class Router<T extends chrome.events.Event<any>, U = {}> {
             const sendResponse = this.sendResponse(...args);
             this.resolver(...args).then(route => {
                 // TODO: Handle notfound
-                const fun = this.routes[route.action].bind({ route });
+                const fun = this.routes[route[ActionKey]].bind({ route });
                 const res = fun(...args);
                 if (res instanceof Promise) res.then(sendResponse);
                 else sendResponse(res);
