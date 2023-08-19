@@ -6,10 +6,10 @@ type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never;
 type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | void> | void);
 type Resolver<Callback extends (...args: any[]) => any, U = {}> = (...args: Parameters<Callback>) => Promise<Resolved<U>>;
 
-// type RouteMatcher<H> = {
-//     match(action: string): boolean;
-//     handelr(): H;
-// }
+type RouteMatcher<H> = {
+    match(action: string): boolean;
+    handelr(): H;
+}
 
 export class Router<T extends chrome.events.Event<any>, U = {}> {
 

@@ -7,6 +7,7 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
     constructor(m: MessageModule);
     constructor(a: number | chrome.tabs.Tab | MessageModule) {
         if (typeof a === "number") {
+            // FIXME: Still there is a possibility of chrome.runtime external message
             this.__mod__ = chrome.tabs;
             this.__tab__ = { id: a };
         } else if (typeof a === "object" && a["id"] !== undefined && a["url"] !== undefined) {
