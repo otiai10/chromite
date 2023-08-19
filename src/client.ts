@@ -1,7 +1,7 @@
 import { ActionKey, ActionKeyAlias } from "./keys";
 
 type HasAlias<T extends string> = { [K in T]: { [P in K]: string } }[T];
-type MessageWithAction<Message> = HasAlias<ActionKeyAlias> & Message;
+type MessageWithAction<Message> = HasAlias<typeof ActionKeyAlias[number]> & Message;
 
 export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)> {
     private __mod__: typeof chrome.runtime | typeof chrome.tabs;

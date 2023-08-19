@@ -6,6 +6,10 @@ describe("Router", () => {
         expect(r).toBeInstanceOf(Router);
     });
 
+    it("should be constructed by default resolver if not given",  () => {
+        const r = new Router();
+    });
+
     describe("on", () => {
         it("should register a route", async () => {
             const r = new Router((m: any) => Promise.resolve({ __action__: m["action"] }));

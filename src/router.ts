@@ -1,4 +1,4 @@
-import { ActionKey } from "./keys";
+import { ActionKey, ActionKeyAlias } from "./keys";
 
 export type Resolved<U = {}> = {
     [ActionKey]: string;
@@ -8,14 +8,19 @@ type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never;
 type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | void> | void);
 type Resolver<Callback extends (...args: any[]) => any, U = {}> = (...args: Parameters<Callback>) => Promise<Resolved<U>>;
 
-type RouteMatcher<H> = {
-    match(action: string): boolean;
-    handelr(): H;
-}
+// type RouteMatcher<H> = {
+//     match(action: string): boolean;
+//     handelr(): H;
+// }
+
+const DefaultResolver = (...args) => {
+    const key = ActionKeyAlias.find(k => args[0][k] !== undefined);
+    return Promise.resolve({ [ActionKey]: key, ...args[0] });
+};
 
 export class Router<T extends chrome.events.Event<any>, U = {}> {
 
-    constructor(private resolver: Resolver<ExtractCallback<T>, U>) { }
+    constructor(private resolver: Resolver<ExtractCallback<T>, U> = DefaultResolver) { }
 
     private routes: { [action: string]: HandlerOf<ExtractCallback<T>> } = {};
 
