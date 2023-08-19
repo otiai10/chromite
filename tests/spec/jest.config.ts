@@ -1,10 +1,9 @@
-const config = {
+import { Config } from "@jest/types";
+
+const config: typeof Config = {
     testMatch: ["./**/*.spec.ts"],
     preset: "ts-jest",
     setupFiles: ["./setup.ts"],
-    // globals: {
-    //     chrome,
-    // },
 };
 
 export default config;
