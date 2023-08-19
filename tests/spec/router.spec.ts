@@ -6,8 +6,15 @@ describe("Router", () => {
         expect(r).toBeInstanceOf(Router);
     });
 
-    it("should be constructed by default resolver if not given",  () => {
+    it("should be constructed by default resolver if not given",  async () => {
         const r = new Router();
+        const callback = jest.fn().mockName("callback").mockImplementation((message: any) => {
+            return { message: `Hello, ${message.name}` };
+        });
+        const sendResponse = jest.fn().mockName("sendResponse");
+        r.on("/greet", callback);
+        r.listener()({ action: "/greet", name: "otiai10" }, {}, sendResponse);
+        await new Promise(resolve => setTimeout(resolve, 0));
     });
 
     describe("on", () => {

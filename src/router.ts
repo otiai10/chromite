@@ -14,7 +14,8 @@ type Resolver<Callback extends (...args: any[]) => any, U = {}> = (...args: Para
 // }
 
 const DefaultResolver = (...args) => {
-    const key = ActionKeyAlias.find(k => args[0][k] !== undefined);
+    const alias = ActionKeyAlias.find(a => args[0][a] !== undefined);
+    const key = args[0][alias];
     return Promise.resolve({ [ActionKey]: key, ...args[0] });
 };
 
