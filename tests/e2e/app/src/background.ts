@@ -1,7 +1,7 @@
-/// <reference types="chrome" />
+import '@types/chrome'
 
-globalThis.log = [];
+globalThis.log = []
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    globalThis.log.push(message);
-    sendResponse({ log: globalThis.log });
-});
+  globalThis.log.push(message)
+  sendResponse({ log: globalThis.log })
+})

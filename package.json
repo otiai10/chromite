@@ -8,7 +8,8 @@
     "watch": "parcel watch",
     "build": "parcel build",
     "test": "jest --config tests/spec/jest.config.ts",
-    "test:e2e": "parcel build && jest --config tests/e2e/jest.config.ts"
+    "test:e2e": "parcel build && jest --config tests/e2e/jest.config.ts",
+    "lint": "eslint src/*.ts tests/**/*.{ts,js}"
   },
   "repository": {
     "type": "git",
