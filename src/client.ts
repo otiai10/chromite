@@ -3,39 +3,39 @@ import { ActionKey, type ActionKeyAlias } from './keys'
 type HasAlias<T extends string> = { [K in T]: { [P in K]: string } }[T]
 type MessageWithAction<Message> = HasAlias<typeof ActionKeyAlias[number]> & Message
 
+interface ClientOptions<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)> {
+  module: MessageModule
+  tabId?: number
+  extId?: string
+}
+
 export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)> {
-  private readonly __mod__: typeof chrome.runtime | typeof chrome.tabs
+  private readonly __mod__: MessageModule
   private readonly __tab_id__?: number
   private readonly __ext_id__?: string
-  constructor (tabId: number)
-  constructor (tabId: number, mod: typeof chrome.tabs)
-  constructor (extId: string)
-  constructor (extId: string, mod: typeof chrome.runtime)
-  constructor (tab: chrome.tabs.Tab)
-  constructor (mod: MessageModule)
-  constructor (a: number | string | chrome.tabs.Tab | MessageModule, b?: MessageModule) {
-    if (typeof a === 'number') {
-      this.__mod__ = b ? (b as typeof chrome.tabs) : chrome.tabs
-      this.__tab_id__ = a
-    } else if (typeof a === 'string') {
-      this.__mod__ = b ? (b as typeof chrome.runtime) : chrome.runtime
-      this.__ext_id__ = a
-    } else if (typeof a === 'object' && a !== null && ('id' in a) && ('url' in a)) {
-      this.__mod__ = chrome.tabs
-      this.__tab_id__ = a.id
-    } else {
-      this.__mod__ = a as (typeof chrome.runtime | typeof chrome.tabs)
-    }
+
+  constructor (opt: ClientOptions<MessageModule>) {
+    this.__mod__ = opt.module
+    this.__tab_id__ = opt.tabId
+    this.__ext_id__ = opt.extId
   }
 
-  public async send<Message = any, Response = any>(action: string): Promise<Response>
-  public async send<Message = any, Response = any>(action: string, message: Message): Promise<Response>
-  public async send<Message = any, Response = any>(message: MessageWithAction<Message>): Promise<Response>
-  public async send<Message = any, Response = any>(a: string | MessageWithAction<Message>, message?: Message): Promise<Response> {
+  public static tab (tab: chrome.tabs.Tab | number): Client<typeof chrome.tabs> {
+    if (typeof tab === 'number') return new Client<typeof chrome.tabs>({ module: chrome.tabs, tabId: tab })
+    return new Client<typeof chrome.tabs>({ module: chrome.tabs, tabId: tab.id })
+  }
+
+  public static runtime (extId?: string): Client<typeof chrome.runtime> {
+    return new Client<typeof chrome.runtime>({ module: chrome.runtime, extId })
+  }
+
+  public async send<Message = Record<string, unknown>, Response = any>(action: string, message?: Message): Promise<Response>
+  public async send<Message = Record<string, unknown>, Response = any>(message: MessageWithAction<Message>): Promise<Response>
+  public async send<Message = Record<string, unknown>, Response = any>(a: string | MessageWithAction<Message>, message = {}): Promise<Response> {
     if (typeof a === 'string') return await this.sendMessage({ [ActionKey]: a, ...(message || {}) })
-    const __action__ = this.findActionKeyInMessage(a)
-    if (!__action__) throw new Error('Action not found')
-    return await this.sendMessage({ [ActionKey]: __action__, ...a })
+    const _action_ = this.findActionKeyInMessage(a)
+    if (!_action_) throw new Error('Action not found')
+    return await this.sendMessage({ [ActionKey]: _action_, ...a })
   }
 
   private async sendMessage<Message = any, Response = any>(message: Message): Promise<Response> {
@@ -50,15 +50,8 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
     if (message.action) return message.action
     return undefined
   }
-}
 
-// Shorthand for chrome.runtime Client
-export const _ = new Client<typeof chrome.runtime>(chrome.runtime)
-
-// Shortcuts for chrome.tabs Client
-export function $ (tabId: number): Client<typeof chrome.tabs>
-export function $ (tab: chrome.tabs.Tab): Client<typeof chrome.tabs>
-export function $ (tab: number | chrome.tabs.Tab): Client<typeof chrome.tabs> {
-  if (typeof tab === 'number') return new Client<typeof chrome.tabs>(tab)
-  return new Client<typeof chrome.tabs>(tab)
+  // Shorthands
+  public static _ = new Client({ module: chrome.runtime })
+  public static $ = Client.tab
 }

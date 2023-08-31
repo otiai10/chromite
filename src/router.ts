@@ -15,8 +15,8 @@ interface RouteMatcher<H, U = any> {
 
 const DefaultResolver = async (...args) => {
   const alias = ActionKeyAlias.find(a => args[0][a] !== undefined)
-  const key = args[0][alias]
-  return await Promise.resolve({ [ActionKey]: key, ...args[0] })
+  if (alias === undefined) return { [ActionKey]: '__notfound__', ...args[0] }
+  return await Promise.resolve({ [ActionKey]: args[0][alias], ...args[0] })
 }
 
 export class Router<T extends chrome.events.Event<any>, U = {}> {
@@ -55,7 +55,7 @@ export class Router<T extends chrome.events.Event<any>, U = {}> {
     return this.routes.regex.push({
       match: (act) => {
         const m = act.match(regex)
-        if (m) return { [ActionKey]: action, ...m.groups }
+        if (m != null) return { [ActionKey]: action, ...m.groups }
         return undefined
       },
       handelr: () => callback
@@ -64,9 +64,9 @@ export class Router<T extends chrome.events.Event<any>, U = {}> {
 
   private findHandler (action: string): HandlerOf<ExtractCallback<T>> {
     const exact = this.routes.exact.find(r => r.match(action))
-    if (exact) return exact.handelr().bind({ route: exact.match(action) })
+    if (exact != null) return exact.handelr().bind({ route: exact.match(action) })
     const regex = this.routes.regex.find(r => r.match(action))
-    if (regex) return regex.handelr().bind({ route: regex.match(action) })
+    if (regex != null) return regex.handelr().bind({ route: regex.match(action) })
     return this.notfound
   }
 
