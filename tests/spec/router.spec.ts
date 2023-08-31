@@ -33,7 +33,7 @@ describe('Router', () => {
 
     it('should parse {} in action and path parameters', async () => {
       const r = new Router()
-      const fn = async function (this: { route: { name: string } }): Promise<{ message: string }> {
+      const fn = function (this: { route: { name: string } }, message: any): any {
         return { message: `Hello, ${this.route.name}!` }
       }
       const callback = jest.fn().mockName('callback').mockImplementation(fn)

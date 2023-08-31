@@ -1,2 +1,2 @@
-export { Client, _, $ } from './client'
+export { Client } from './client'
 export { Router } from './router'

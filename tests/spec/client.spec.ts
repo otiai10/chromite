@@ -1,39 +1,39 @@
 import { chrome } from 'jest-chrome'
-import { Client, _, $ } from '../../src'
+import { Client } from '../../src'
 
 describe('Client', () => {
   it('should be a class', async () => {
-    let c = new Client(1000)
-    c = new Client({ id: 1000, url: 'https://example.com' })
-    c = new Client(chrome.runtime)
+    const c = Client.tab(1000)
     await c.send({ action: 'otiai10' })
     expect(c).toBeInstanceOf(Client)
   })
 })
 
 describe('_', () => {
-  chrome.runtime.sendMessage.mockImplementation(async (message: any) => {
-    return { greet: `Hello, ${message.name as string}!` }
+  chrome.runtime.sendMessage.mockImplementation(async (extId: string | null | undefined, message: any) => {
+    const name: string = message.name
+    return await Promise.resolve({ greet: `Hello, ${name}!` })
   })
   it('should be an instance of Client', () => {
-    expect(_).toBeInstanceOf(Client)
+    expect(Client._).toBeInstanceOf(Client)
   })
   it('should do something', async () => {
-    const res = await _.send({ __action__: '/foo', name: 'otiai10' })
+    const res = await Client._.send('/foo', { name: 'otiai10' })
     expect(res.greet).toBe('Hello, otiai10!')
-    expect(chrome.runtime.sendMessage).toBeCalledWith({ __action__: '/foo', name: 'otiai10' })
+    expect(chrome.runtime.sendMessage).toBeCalledWith(null, { __action__: '/foo', name: 'otiai10' })
   })
 })
 
 describe('$', () => {
-  chrome.tabs.sendMessage.mockImplementation(async (tabId: number, message: { name: string }) => {
-    return await Promise.resolve({ greet: `Hello, ${message.name}!` })
+  chrome.tabs.sendMessage.mockImplementation(async (tabId: number, message: any) => {
+    const name: string = message.name
+    return await Promise.resolve({ greet: `Hello, ${name}!` })
   })
   it('should be an instance of Client', () => {
-    expect($).toBeInstanceOf(Function)
+    expect(Client.$).toBeInstanceOf(Function)
   })
   it('should do something', async () => {
-    const res = await $(1000).send('/bar', { name: 'otiai10' })
+    const res = await Client.$(1000).send('/bar', { name: 'otiai10' })
     expect(res.greet).toBe('Hello, otiai10!')
     expect(chrome.tabs.sendMessage).toBeCalledWith(1000, { __action__: '/bar', name: 'otiai10' })
   })

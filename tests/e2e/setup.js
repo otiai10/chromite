@@ -11,8 +11,8 @@ module.exports = async function () {
   const browser = await puppeteer.launch({
     headless: false,
     args: [
-            `--disable-extensions-except=${extention}`,
-            `---load-extension=${extention}`
+      `--disable-extensions-except=${extention}`,
+      `---load-extension=${extention}`
     ]
   })
 

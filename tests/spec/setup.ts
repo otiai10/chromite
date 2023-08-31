@@ -1,3 +1,2 @@
-import * as chrome from 'jest-chrome'
-
-Object.assign(global, chrome)
+/* eslint-disable @typescript-eslint/no-var-requires */
+Object.assign(global, require('jest-chrome'))

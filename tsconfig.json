@@ -1,14 +1,10 @@
 {
     "compilerOptions": {
         "types": [
-            "chrome",
-            "jest",
-            "node"
+            "chrome", "jest", "node"
         ],
         "lib": [
-            "es5",
-            "es2015",
-            "dom"
+            "es5", "es2015", "dom"
         ],
         "target": "es5",
         "module": "commonjs",
