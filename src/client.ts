@@ -1,4 +1,4 @@
-import { ActionKey, ActionKeyAlias } from './keys'
+import { ActionKey, type ActionKeyAlias } from './keys'
 
 type HasAlias<T extends string> = { [K in T]: { [P in K]: string } }[T]
 type MessageWithAction<Message> = HasAlias<typeof ActionKeyAlias[number]> & Message
@@ -7,7 +7,6 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
   private readonly __mod__: typeof chrome.runtime | typeof chrome.tabs
   private readonly __tab_id__?: number
   private readonly __ext_id__?: string
-
   constructor (tabId: number)
   constructor (tabId: number, mod: typeof chrome.tabs)
   constructor (extId: string)
@@ -16,12 +15,13 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
   constructor (mod: MessageModule)
   constructor (a: number | string | chrome.tabs.Tab | MessageModule, b?: MessageModule) {
     if (typeof a === 'number') {
-      this.__mod__ = (b !== undefined) ? (b as typeof chrome.tabs) : chrome.tabs
+      this.__mod__ = b ? (b as typeof chrome.tabs) : chrome.tabs
       this.__tab_id__ = a
     } else if (typeof a === 'string') {
-      this.__mod__ = (b !== undefined) ? (b as typeof chrome.runtime) : chrome.runtime
+      this.__mod__ = b ? (b as typeof chrome.runtime) : chrome.runtime
       this.__ext_id__ = a
-    } else if (typeof a === 'object' && a !== null && 'id' in a && 'url' in a) {
+    } else if (typeof a === 'object' && a.id !== undefined && a.url !== undefined) {
+      a = a as chrome.tabs.Tab
       this.__mod__ = chrome.tabs
       this.__tab_id__ = a.id
     } else {
@@ -29,26 +29,26 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
     }
   }
 
-  public async send<Response = any>(action: string): Promise<Response>
+  public async send<Message = any, Response = any>(action: string): Promise<Response>
   public async send<Message = any, Response = any>(action: string, message: Message): Promise<Response>
   public async send<Message = any, Response = any>(message: MessageWithAction<Message>): Promise<Response>
   public async send<Message = any, Response = any>(a: string | MessageWithAction<Message>, message?: Message): Promise<Response> {
-    if (typeof a === 'string') return await this.sendMessage({ [ActionKey]: a, ...(message ?? {}) })
-    const _action_ = this.findActionKeyInMessage(a)
-    if (_action_ === undefined) throw new Error('Action not found')
-    return await this.sendMessage({ [ActionKey]: _action_, ...a })
+    if (typeof a === 'string') return await this.sendMessage({ [ActionKey]: a, ...(message || {}) })
+    const __action__ = this.findActionKeyInMessage(a)
+    if (!__action__) throw new Error('Action not found')
+    return await this.sendMessage({ [ActionKey]: __action__, ...a })
   }
 
   private async sendMessage<Message = any, Response = any>(message: Message): Promise<Response> {
-    if (typeof this.__tab_id__ === 'number') return await (this.__mod__ as typeof chrome.tabs).sendMessage(this.__tab_id__, message)
-    if (typeof this.__ext_id__ === 'string') return await (this.__mod__ as typeof chrome.runtime).sendMessage(this.__ext_id__, message)
+    if (this.__tab_id__) return await (this.__mod__ as typeof chrome.tabs).sendMessage(this.__tab_id__, message)
+    if (this.__ext_id__) return await (this.__mod__ as typeof chrome.runtime).sendMessage(this.__ext_id__, message)
     return await (this.__mod__ as typeof chrome.runtime).sendMessage(message)
   }
 
   private findActionKeyInMessage (message: any): string | undefined {
-    for (const alias of ActionKeyAlias) {
-      if (alias in message) return message[alias]
-    }
+    if (message.__action__) return message.__action__
+    if (message._act_) return message._act_
+    if (message.action) return message.action
     return undefined
   }
 }

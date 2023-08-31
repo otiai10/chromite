@@ -1,31 +1,31 @@
 import { ActionKey, ActionKeyAlias } from './keys'
 
-export type Resolved<U = unknown> = {
+export type Resolved<U = {}> = {
   [ActionKey]: string
 } & U
 
 type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
-type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => Promise<any>
-type Resolver<Callback extends (...args: any[]) => any, U = unknown> = (...args: Parameters<Callback>) => Promise<Resolved<U>>
+type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | void> | void)
+type Resolver<Callback extends (...args: any[]) => any, U = {}> = (...args: Parameters<Callback>) => Promise<Resolved<U>>
 
 interface RouteMatcher<H, U = any> {
   match: (action: string) => Resolved<U> | undefined
   handelr: () => H
 }
 
-const DefaultResolver = async (...args): Promise<Resolved<any>> => {
+const DefaultResolver = async (...args) => {
   const alias = ActionKeyAlias.find(a => args[0][a] !== undefined)
-  const key = alias !== undefined ? args[0][alias] : '__notfound__'
+  const key = args[0][alias]
   return await Promise.resolve({ [ActionKey]: key, ...args[0] })
 }
 
-export class Router<T extends chrome.events.Event<any>, U = unknown> {
+export class Router<T extends chrome.events.Event<any>, U = {}> {
   constructor (private readonly resolver: Resolver<ExtractCallback<T>, U> = DefaultResolver) { }
 
   // private routes: { [action: string]: HandlerOf<ExtractCallback<T>> } = {};
 
-  private notfound: HandlerOf<ExtractCallback<T>> = async () => { }
-  public onNotFound (callback: HandlerOf<ExtractCallback<T>>): void {
+  private notfound: HandlerOf<ExtractCallback<T>> = () => { }
+  public onNotFound (callback: HandlerOf<ExtractCallback<T>>) {
     this.notfound = callback
   }
 
@@ -34,13 +34,13 @@ export class Router<T extends chrome.events.Event<any>, U = unknown> {
     regex: Array<RouteMatcher<HandlerOf<ExtractCallback<T>>>>
   } = { exact: [], regex: [] }
 
-  public on (action: string, callback: HandlerOf<ExtractCallback<T>>): unknown {
+  public on (action: string, callback: HandlerOf<ExtractCallback<T>>) {
     let includesRegex = false
     const segments = action.split('/').filter(c => c !== '').map(c => {
       if (c.startsWith('{') && c.endsWith('}')) {
         includesRegex = true
         const name = c.slice(1, c.length - 1)
-        return `(?<${name}>[^\\/]+)`
+        return `(?<${name}>[^\\\/]+)`
       }
       return c
     })
@@ -50,12 +50,12 @@ export class Router<T extends chrome.events.Event<any>, U = unknown> {
         handelr: () => callback
       })
     }
-    const str = '^' + '\\/' + segments.join('\\/') + '$'
+    const str = '^' + '\\\/' + segments.join('\\\/') + '$'
     const regex = new RegExp(str)
     return this.routes.regex.push({
       match: (act) => {
         const m = act.match(regex)
-        if (m !== null) return { [ActionKey]: action, ...m.groups }
+        if (m) return { [ActionKey]: action, ...m.groups }
         return undefined
       },
       handelr: () => callback
@@ -64,9 +64,9 @@ export class Router<T extends chrome.events.Event<any>, U = unknown> {
 
   private findHandler (action: string): HandlerOf<ExtractCallback<T>> {
     const exact = this.routes.exact.find(r => r.match(action))
-    if (exact !== undefined) return exact.handelr().bind({ route: exact.match(action) })
+    if (exact) return exact.handelr().bind({ route: exact.match(action) })
     const regex = this.routes.regex.find(r => r.match(action))
-    if (regex !== undefined) return regex.handelr().bind({ route: regex.match(action) })
+    if (regex) return regex.handelr().bind({ route: regex.match(action) })
     return this.notfound
   }
 
@@ -76,21 +76,15 @@ export class Router<T extends chrome.events.Event<any>, U = unknown> {
       this.resolver(...args).then(route => {
         const fn = this.findHandler(route[ActionKey])
         const res = fn(...args)
-        if (res instanceof Promise) {
-          res.then(sendResponse).catch(err => {
-            sendResponse({ error: err })
-          })
-        } else sendResponse(res)
-      }).catch(err => {
-        // console.error(err)
-        sendResponse({ error: err })
+        if (res instanceof Promise) res.then(sendResponse)
+        else sendResponse(res)
       })
       return true
     }) as ExtractCallback<T>
   }
 
   private sendResponse (...args): (any) => void {
-    if (args.length === 0) return () => {}
+    if (args.length == 0) return () => {}
     return typeof args[args.length - 1] === 'function'
       ? args[args.length - 1]
       : () => {}
