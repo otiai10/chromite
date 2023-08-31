@@ -1,4 +1,4 @@
-import { ActionKey, type ActionKeyAlias } from './keys'
+import { ActionKey, ActionKeyAlias } from './keys'
 
 type HasAlias<T extends string> = { [K in T]: { [P in K]: string } }[T]
 type MessageWithAction<Message> = HasAlias<typeof ActionKeyAlias[number]> & Message
@@ -45,10 +45,9 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
   }
 
   private findActionKeyInMessage (message: any): string | undefined {
-    if (message.__action__) return message.__action__
-    if (message._act_) return message._act_
-    if (message.action) return message.action
-    return undefined
+    const key = ActionKeyAlias.find(key => message[key] !== undefined)
+    if (key === undefined) return undefined
+    return message[key]
   }
 
   // Shorthands

@@ -17,7 +17,7 @@ describe('_', () => {
     expect(Client._).toBeInstanceOf(Client)
   })
   it('should do something', async () => {
-    const res = await Client._.send({ __action__: '/foo', name: 'otiai10' })
+    const res = await Client._.send('/foo', { name: 'otiai10' })
     expect(res.greet).toBe('Hello, otiai10!')
     expect(chrome.runtime.sendMessage).toBeCalledWith({ __action__: '/foo', name: 'otiai10' })
   })
