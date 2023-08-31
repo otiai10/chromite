@@ -1,31 +1,31 @@
 import { ActionKey, ActionKeyAlias } from './keys'
 
-export type Resolved<U = {}> = {
+export type Resolved<U = Record<string, unknown>> = {
   [ActionKey]: string
 } & U
 
 type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
-type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | void> | void)
-type Resolver<Callback extends (...args: any[]) => any, U = {}> = (...args: Parameters<Callback>) => Promise<Resolved<U>>
+type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | undefined> | undefined)
+type Resolver<Callback extends (...args: any[]) => any, U = Record<string, unknown>> = (...args: Parameters<Callback>) => Promise<Resolved<U>>
 
 interface RouteMatcher<H, U = any> {
   match: (action: string) => Resolved<U> | undefined
   handelr: () => H
 }
 
-const DefaultResolver = async (...args) => {
+const DefaultResolver = async <U = any>(...args): Promise<Resolved<U>> => {
   const alias = ActionKeyAlias.find(a => args[0][a] !== undefined)
   if (alias === undefined) return { [ActionKey]: '__notfound__', ...args[0] }
   return await Promise.resolve({ [ActionKey]: args[0][alias], ...args[0] })
 }
 
-export class Router<T extends chrome.events.Event<any>, U = {}> {
+export class Router<T extends chrome.events.Event<any>, U = Record<string, unknown>> {
   constructor (private readonly resolver: Resolver<ExtractCallback<T>, U> = DefaultResolver) { }
 
   // private routes: { [action: string]: HandlerOf<ExtractCallback<T>> } = {};
 
-  private notfound: HandlerOf<ExtractCallback<T>> = () => { }
-  public onNotFound (callback: HandlerOf<ExtractCallback<T>>) {
+  private notfound: HandlerOf<ExtractCallback<T>> = async () => { }
+  public onNotFound (callback: HandlerOf<ExtractCallback<T>>): void {
     this.notfound = callback
   }
 
@@ -34,13 +34,13 @@ export class Router<T extends chrome.events.Event<any>, U = {}> {
     regex: Array<RouteMatcher<HandlerOf<ExtractCallback<T>>>>
   } = { exact: [], regex: [] }
 
-  public on (action: string, callback: HandlerOf<ExtractCallback<T>>) {
+  public on (action: string, callback: HandlerOf<ExtractCallback<T>>): unknown {
     let includesRegex = false
     const segments = action.split('/').filter(c => c !== '').map(c => {
       if (c.startsWith('{') && c.endsWith('}')) {
         includesRegex = true
         const name = c.slice(1, c.length - 1)
-        return `(?<${name}>[^\\\/]+)`
+        return `(?<${name}>[^\\/]+)`
       }
       return c
     })
@@ -50,7 +50,7 @@ export class Router<T extends chrome.events.Event<any>, U = {}> {
         handelr: () => callback
       })
     }
-    const str = '^' + '\\\/' + segments.join('\\\/') + '$'
+    const str = '^' + '\\/' + segments.join('\\/') + '$'
     const regex = new RegExp(str)
     return this.routes.regex.push({
       match: (act) => {
@@ -76,15 +76,18 @@ export class Router<T extends chrome.events.Event<any>, U = {}> {
       this.resolver(...args).then(route => {
         const fn = this.findHandler(route[ActionKey])
         const res = fn(...args)
-        if (res instanceof Promise) res.then(sendResponse)
+        if (res instanceof Promise) void res.then(sendResponse)
         else sendResponse(res)
+      }).catch(err => {
+        console.error(err)
+        sendResponse({ [ActionKey]: '__notfound__', ...args }) // TODO: Handle error case
       })
       return true
     }) as ExtractCallback<T>
   }
 
   private sendResponse (...args): (any) => void {
-    if (args.length == 0) return () => {}
+    if (args.length === 0) return () => {}
     return typeof args[args.length - 1] === 'function'
       ? args[args.length - 1]
       : () => {}

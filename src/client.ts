@@ -32,16 +32,20 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
   public async send<Message = Record<string, unknown>, Response = any>(action: string, message?: Message): Promise<Response>
   public async send<Message = Record<string, unknown>, Response = any>(message: MessageWithAction<Message>): Promise<Response>
   public async send<Message = Record<string, unknown>, Response = any>(a: string | MessageWithAction<Message>, message = {}): Promise<Response> {
-    if (typeof a === 'string') return await this.sendMessage({ [ActionKey]: a, ...(message || {}) })
+    if (typeof a === 'string') return await this.sendMessage({ [ActionKey]: a, ...message })
     const _action_ = this.findActionKeyInMessage(a)
-    if (!_action_) throw new Error('Action not found')
+    if (_action_ === undefined || _action_ === '') throw new Error('Action not found')
     return await this.sendMessage({ [ActionKey]: _action_, ...a })
   }
 
   private async sendMessage<Message = any, Response = any>(message: Message): Promise<Response> {
-    if (this.__tab_id__) return await (this.__mod__ as typeof chrome.tabs).sendMessage(this.__tab_id__, message)
-    if (this.__ext_id__) return await (this.__mod__ as typeof chrome.runtime).sendMessage(this.__ext_id__, message)
-    return await (this.__mod__ as typeof chrome.runtime).sendMessage(message)
+    if (typeof this.__tab_id__ === 'number') {
+      return await (this.__mod__ as typeof chrome.tabs).sendMessage(this.__tab_id__, message)
+    }
+    if (typeof this.__ext_id__ === 'string') {
+      return await (this.__mod__ as typeof chrome.runtime).sendMessage(this.__ext_id__, message)
+    }
+    return await (this.__mod__ as typeof chrome.runtime).sendMessage(null, message)
   }
 
   private findActionKeyInMessage (message: any): string | undefined {

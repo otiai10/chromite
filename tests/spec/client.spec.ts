@@ -10,8 +10,9 @@ describe('Client', () => {
 })
 
 describe('_', () => {
-  chrome.runtime.sendMessage.mockImplementation(async (message: any) => {
-    return await Promise.resolve({ greet: `Hello, ${message.name}!` })
+  chrome.runtime.sendMessage.mockImplementation(async (extId: string | null | undefined, message: any) => {
+    const name: string = message.name
+    return await Promise.resolve({ greet: `Hello, ${name}!` })
   })
   it('should be an instance of Client', () => {
     expect(Client._).toBeInstanceOf(Client)
@@ -19,13 +20,14 @@ describe('_', () => {
   it('should do something', async () => {
     const res = await Client._.send('/foo', { name: 'otiai10' })
     expect(res.greet).toBe('Hello, otiai10!')
-    expect(chrome.runtime.sendMessage).toBeCalledWith({ __action__: '/foo', name: 'otiai10' })
+    expect(chrome.runtime.sendMessage).toBeCalledWith(null, { __action__: '/foo', name: 'otiai10' })
   })
 })
 
 describe('$', () => {
   chrome.tabs.sendMessage.mockImplementation(async (tabId: number, message: any) => {
-    return await Promise.resolve({ greet: `Hello, ${message.name}!` })
+    const name: string = message.name
+    return await Promise.resolve({ greet: `Hello, ${name}!` })
   })
   it('should be an instance of Client', () => {
     expect(Client.$).toBeInstanceOf(Function)

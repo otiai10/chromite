@@ -8,7 +8,7 @@ describe('Router', () => {
 
   it('should be constructed by default resolver if not given', async () => {
     const r = new Router()
-    const callback = jest.fn().mockName('callback').mockImplementation((message: any) => {
+    const callback = jest.fn().mockName('callback').mockImplementation((message: { name: string }) => {
       return { message: `Hello, ${message.name}` }
     })
     const sendResponse = jest.fn().mockName('sendResponse')
@@ -20,7 +20,7 @@ describe('Router', () => {
   describe('on', () => {
     it('should register a route', async () => {
       const r = new Router(async (m: any) => await Promise.resolve({ __action__: m.action }))
-      const callback = jest.fn().mockName('callback').mockImplementation((message: any) => {
+      const callback = jest.fn().mockName('callback').mockImplementation((message: { name: string }) => {
         return { message: `Hello, ${message.name}` }
       })
       const sendResponse = jest.fn().mockName('sendResponse')
@@ -33,7 +33,7 @@ describe('Router', () => {
 
     it('should parse {} in action and path parameters', async () => {
       const r = new Router()
-      const fn = function (this: any, message: any) {
+      const fn = function (this: { route: { name: string } }, message: any): any {
         return { message: `Hello, ${this.route.name}!` }
       }
       const callback = jest.fn().mockName('callback').mockImplementation(fn)
