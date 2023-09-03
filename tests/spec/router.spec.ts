@@ -70,4 +70,22 @@ describe('Router', () => {
       expect(sendResponse).toBeCalledWith({ status: 5004, message: 'See you yesterday ;)' })
     })
   })
+
+  describe('onError', () => {
+    it('should overwrite a handler for error', async () => {
+      const r = new Router<chrome.runtime.ExtensionMessageEvent, { status: number }>()
+      const onerror = jest.fn().mockName('callback').mockImplementation(async function (this: any) {
+        return { message: 'See you yesterday ;)', status: 500, error: this.error }
+      })
+      const sendResponse = jest.fn().mockName('sendResponse')
+      r.onError(onerror)
+      r.on('/problem', async function () {
+        throw new Error('Something wrong')
+      })
+      r.listener()({ action: '/problem' }, {}, sendResponse)
+      await new Promise(resolve => setTimeout(resolve, 0))
+      expect(onerror).toBeCalled()
+      expect(sendResponse).toBeCalledWith({ status: 500, message: 'See you yesterday ;)', error: new Error('Something wrong') })
+    })
+  })
 })

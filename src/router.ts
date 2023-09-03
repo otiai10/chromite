@@ -33,6 +33,16 @@ export class Router<T extends chrome.events.Event<any>, U = Record<string, unkno
     this.notfound = callback
   }
 
+  // Error handler
+  private error: HandlerOf<ExtractCallback<T>> = async function (this: { route: Resolved<U> }, ...args) {
+    return { status: 500, message: `Handler for request "${this.route[ActionKey]}" throw an error` }
+  }
+
+  // onError can overwire behavior for 500-ish error
+  public onError (callback: HandlerOf<ExtractCallback<T>>): void {
+    this.error = callback
+  }
+
   private readonly routes: {
     exact: Array<RouteMatcher<HandlerOf<ExtractCallback<T>>>>
     regex: Array<RouteMatcher<HandlerOf<ExtractCallback<T>>>>
@@ -80,11 +90,14 @@ export class Router<T extends chrome.events.Event<any>, U = Record<string, unkno
       this.resolver(...args).then(route => {
         const fn = this.findHandler(route[ActionKey])
         const res = fn(...args)
-        if (res instanceof Promise) void res.then(sendResponse)
-        else sendResponse(res)
+        if (res instanceof Promise) {
+          res.then(sendResponse).catch(err => this.error.bind({
+            route, error: err
+          })(...args).then(sendResponse))
+        } else sendResponse(res)
       }).catch(err => {
-        console.error(err)
-        sendResponse({ [ActionKey]: '__notfound__', ...args }) // TODO: Handle error case
+        const fn = this.error.bind({ route: { [ActionKey]: '__router_error__', error: err } })
+        void fn(...args).then(sendResponse)
       })
       return true
     }) as ExtractCallback<T>
