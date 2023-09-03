@@ -47,16 +47,27 @@ describe('Router', () => {
     })
   })
 
-  describe('onNotFound', () => {
-    it('should register a handler for not found', async () => {
+  describe('default NotFound handler', () => {
+    it('should send response with status:404', async () => {
       const r = new Router()
-      const callback = jest.fn().mockName('callback')
+      const sendResponse = jest.fn().mockName('sendResponse')
+      r.listener()({ action: '/notfound' }, {}, sendResponse)
+      await new Promise(resolve => setTimeout(resolve, 0))
+      expect(sendResponse).toBeCalledWith({ status: 404, message: 'Handler for request "/notfound" not found' })
+    })
+  })
+  describe('onNotFound', () => {
+    it('should overwrite a handler for not found', async () => {
+      const r = new Router()
+      const callback = jest.fn().mockName('callback').mockImplementation(async function (this: any) {
+        return { message: 'See you yesterday ;)', status: 5004 }
+      })
       const sendResponse = jest.fn().mockName('sendResponse')
       r.onNotFound(callback)
       r.listener()({ action: '/notfound' }, {}, sendResponse)
       await new Promise(resolve => setTimeout(resolve, 0))
       expect(callback).toBeCalled()
-      expect(sendResponse).toBeCalled()
+      expect(sendResponse).toBeCalledWith({ status: 5004, message: 'See you yesterday ;)' })
     })
   })
 })

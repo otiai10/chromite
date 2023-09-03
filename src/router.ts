@@ -22,9 +22,13 @@ const DefaultResolver = async <U = any>(...args): Promise<Resolved<U>> => {
 export class Router<T extends chrome.events.Event<any>, U = Record<string, unknown>> {
   constructor (private readonly resolver: Resolver<ExtractCallback<T>, U> = DefaultResolver) { }
 
-  // private routes: { [action: string]: HandlerOf<ExtractCallback<T>> } = {};
+  // NotFound handler
+  private notfound: HandlerOf<ExtractCallback<T>> = async function (this: { route: Resolved<U> }, ...args) {
+    // This is default 404 handler
+    return { status: 404, message: `Handler for request "${this.route[ActionKey]}" not found` }
+  }
 
-  private notfound: HandlerOf<ExtractCallback<T>> = async () => { }
+  // onNotFound can overwrite behavior for 404
   public onNotFound (callback: HandlerOf<ExtractCallback<T>>): void {
     this.notfound = callback
   }
@@ -67,7 +71,7 @@ export class Router<T extends chrome.events.Event<any>, U = Record<string, unkno
     if (exact != null) return exact.handelr().bind({ route: exact.match(action) })
     const regex = this.routes.regex.find(r => r.match(action))
     if (regex != null) return regex.handelr().bind({ route: regex.match(action) })
-    return this.notfound
+    return this.notfound.bind({ route: { [ActionKey]: action } })
   }
 
   public listener (): ExtractCallback<T> {
