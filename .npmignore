@@ -1,0 +1,6 @@
+.eslintrc.yml
+.github
+.parcelrc
+src
+tests
+tsconfig.json
