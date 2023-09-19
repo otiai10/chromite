@@ -1,6 +1,7 @@
 .eslintrc.yml
 .github
 .parcelrc
+.parcel-cache
 src
 tests
 tsconfig.json
