@@ -1,6 +1,6 @@
 {
-  "name": "@otiai10/chromite",
-  "version": "0.0.1",
+  "name": "chromite",
+  "version": "0.0.2",
   "description": "Chrome Extension Message-Routing toolkit",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
