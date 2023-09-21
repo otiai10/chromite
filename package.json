@@ -5,12 +5,11 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
-    "watch": "parcel watch",
-    "build": "parcel build",
-    "build:dts": "tsc --declaration --emitDeclarationOnly --outDir lib ./src/index.ts",
-    "build:release": "npm run build && npm run build:dts",
+    "clean": "rm -rf lib tests/e2e/app/dist",
+    "build": "tsc --declaration --outDir lib ./src/index.ts",
+    "build:e2e": "tsc --outDir tests/e2e/app/dist ./tests/e2e/app/src/*.ts",
     "test": "jest --config tests/spec/jest.config.ts",
-    "test:e2e": "parcel build && jest --config tests/e2e/jest.config.ts",
+    "test:e2e": "npm run build:e2e && jest --config tests/e2e/jest.config.ts",
     "lint": "eslint src/*.ts tests/**/*.{ts,js}"
   },
   "repository": {
@@ -31,9 +30,6 @@
   },
   "homepage": "https://github.com/otiai10/chromite#readme",
   "devDependencies": {
-    "@parcel/packager-ts": "^2.8.3",
-    "@parcel/transformer-typescript-tsc": "^2.8.3",
-    "@parcel/transformer-typescript-types": "^2.8.3",
     "@types/chrome": "^0.0.233",
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
@@ -45,7 +41,6 @@
     "jest": "^27.0.0",
     "jest-chrome": "^0.8.0",
     "jest-puppeteer": "^8.0.6",
-    "parcel": "latest",
     "puppeteer": "^19.9.1",
     "ts-jest": "^27.0.0",
     "ts-node": "^10.9.1",
