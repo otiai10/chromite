@@ -40,12 +40,12 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
 
   private async sendMessage<Message = any, Response = any>(message: Message): Promise<Response> {
     if (typeof this.__tab_id__ === 'number') {
-      return await (this.__mod__ as typeof chrome.tabs).sendMessage(this.__tab_id__, message)
+      return await (this.__mod__ as unknown as typeof chrome.tabs).sendMessage(this.__tab_id__, message)
     }
     if (typeof this.__ext_id__ === 'string') {
-      return await (this.__mod__ as typeof chrome.runtime).sendMessage(this.__ext_id__, message)
+      return await (this.__mod__ as unknown as typeof chrome.runtime).sendMessage(this.__ext_id__, message)
     }
-    return await (this.__mod__ as typeof chrome.runtime).sendMessage(null, message)
+    return await (this.__mod__ as unknown as typeof chrome.runtime).sendMessage(null, message)
   }
 
   private findActionKeyInMessage (message: any): string | undefined {

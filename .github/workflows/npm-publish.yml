@@ -13,10 +13,12 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm run build:release
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - run: pnpm ci
+      - run: pnpm run build:release
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
