@@ -1,5 +1,7 @@
 .eslintrc.yml
 .github
+.vscode
 src
 tests
 tsconfig.json
+coverage
