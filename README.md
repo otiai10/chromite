@@ -1,8 +1,11 @@
 # chromite - Chrome Extension Messaging Routing Kit
 
+[![version](https://img.shields.io/npm/v/chromite)](https://www.npmjs.com/package/chromite)
+[![downloads](https://img.shields.io/npm/dt/chromite)](https://www.npmjs.com/package/chromite)
 [![Node.js CI](https://github.com/otiai10/chromite/actions/workflows/node-ci.yml/badge.svg)](https://github.com/otiai10/chromite/actions/workflows/node-ci.yml)
 [![Chrome E2E Test](https://github.com/otiai10/chromite/actions/workflows/e2e-test.yml/badge.svg)](https://github.com/otiai10/chromite/actions/workflows/e2e-test.yml)
 [![codecov](https://codecov.io/github/otiai10/chromite/branch/main/graph/badge.svg?token=wAWd6Vhy4j)](https://codecov.io/github/otiai10/chromite)
+[![Maintainability](https://api.codeclimate.com/v1/badges/920634c9e31e0df99677/maintainability)](https://codeclimate.com/github/otiai10/chromite/maintainability)
 
 
 * Use `Router` to simplify your `onMessage` event listener routing
