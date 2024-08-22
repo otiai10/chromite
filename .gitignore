@@ -3,3 +3,6 @@ lib
 tests/e2e/app/dist
 tests/e2e/output
 coverage
+
+# Editor
+.vscode
