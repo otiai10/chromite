@@ -10,6 +10,7 @@
 
 * Use `Router` to simplify your `onMessage` event listener routing
 * Use `Client` as a shorthand for `sendMessage`
+* Use `Logger` for decorating `console.log` with intuitive interface
 
 to write your Chrome Extension in the way of Web Application Development.
 
@@ -42,7 +43,9 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 });
 ```
 
-This is very similar to what we write when we build a web application and routing for HTTP request. Then, if we organize the code in that manner, we can create a Chrome extension source code that is more comprehensible and maintainable.
+This is very similar to what we write when we build a web application and routing HTTP request. Then, if we organize the code in that manner, we can create a Chrome extension source code that is more comprehensible and maintainable.
+
+# Router
 
 Specifically, it would look like this:
 
@@ -102,6 +105,47 @@ Now you might want something like `ActiveRecord` to access and OR-mapping `chrom
 There is a separated package: `jstorm` - JavaScript ORM for `chrome.storage` and `LocalStorage`.
 
 https://github.com/otiai10/jstorm
+
+Small example:
+
+```javascript
+// This uses window.sessionStorage
+import { Model } from "jstorm/browser/session";
+
+class User extends Model {
+  public name: string;
+  public age:  number;
+}
+
+(async () => {
+  const otiai10 = User.new({name:"otiai10"});
+  (otiai10._id) // null, yes
+  await otiai10.save();
+  (otiai10._id) // NOT null, because saved
+
+  const found = await User.find(otiai10._id);
+  (found._id == otiai10._id) // true
+
+  otiai10.delete();
+})();
+
+```
+
+# Logger
+
+Last but not least, logging is also important for us. Even though we know we can customize `console.log` by `%c` decorator, it would be messy if we do that all the time. `Logger` is just a memorandum for that decoration, or we can just use like following:
+
+```javascript
+import {Logger, LogLevel} from "chromite";
+
+const logger = new Logger("your_project", LogLevel.ERROR);
+
+logger.warn("hello", 100, {name: "otiai10"});
+// prints nothing because level is set to "ERROR"
+
+// This prints these messages with colored prefix "[ERROR]"
+logger.error("hey", {code: 500, msg: ["some", "problem"]});
+```
 
 # Issues
 
