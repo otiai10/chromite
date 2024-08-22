@@ -7,19 +7,19 @@ export enum LogLevel {
 
 export class Logger {
   public static global: {
-    _level: LogLevel;
-    level: (level: LogLevel) => void;
+    _level: LogLevel
+    level: (level: LogLevel) => void
     // _format: string;
   } = {
       _level: LogLevel.INFO,
-      level(l: LogLevel) {
-        this._level = l;
-      },
-    };
+      level (l: LogLevel) {
+        this._level = l
+      }
+    }
 
   constructor (
     public readonly project: string,
-    public level: LogLevel = Logger.global._level,
+    public level: LogLevel = Logger.global._level
   ) { }
 
   public readonly emoji: {
