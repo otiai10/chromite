@@ -6,9 +6,11 @@ export enum LogLevel {
 }
 
 export class Logger {
+  public static global: LogLevel = LogLevel.INFO
+
   constructor (
     public readonly project: string,
-    public level: LogLevel = LogLevel.INFO
+    public level: LogLevel = Logger.global
   ) { }
 
   public readonly emoji: {
