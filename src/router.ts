@@ -4,7 +4,9 @@ export type Resolved<U = Record<string, unknown>> = {
   [ActionKey]: string
 } & U
 
-type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
+// type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
+type RoutingTargetEvent = chrome.events.Event<any> | chrome.events.EventWithRequiredFilterInAddListener<any>
+type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : (T extends chrome.events.EventWithRequiredFilterInAddListener<infer V> ? V : never)
 type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | undefined> | undefined)
 type Resolver<Callback extends (...args: any[]) => any, U = Record<string, unknown>> = (...args: Parameters<Callback>) => Promise<Resolved<U>>
 
@@ -19,7 +21,7 @@ const DefaultResolver = async <U = any>(...args): Promise<Resolved<U>> => {
   return await Promise.resolve({ [ActionKey]: args[0][alias], ...args[0] })
 }
 
-export class Router<T extends chrome.events.Event<any>, U = Record<string, unknown>> {
+export class Router<T extends RoutingTargetEvent, U = Record<string, unknown>> {
   constructor (private readonly resolver: Resolver<ExtractCallback<T>, U> = DefaultResolver) { }
 
   // NotFound handler

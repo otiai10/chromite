@@ -16,6 +16,12 @@ describe('Router', () => {
     r.listener()({ action: '/greet', name: 'otiai10' }, {}, sendResponse)
     await new Promise(resolve => setTimeout(resolve, 0))
   })
+  it('should be constructed with EventWithRequiredFilterInAddListener generics', async () => {
+    const r = new Router<chrome.webRequest.WebRequestBodyEvent>(async (details: chrome.webRequest.WebRequestBodyDetails) => {
+      return { __action__: '/test' }
+    })
+    expect(r).toBeInstanceOf(Router)
+  })
 
   describe('on', () => {
     it('should register a route', async () => {
