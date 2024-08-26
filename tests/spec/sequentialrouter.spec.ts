@@ -1,4 +1,4 @@
-import { SequentialRouter } from '../../src/router'
+import { SequentialRouter } from '../../src/sequential-router'
 
 describe('SequentialRouter', () => {
   it('should register a route', async () => {
@@ -7,10 +7,13 @@ describe('SequentialRouter', () => {
     r.on(['/precommit', '/commit'], c)
     const listen = r.listener()
     const s = jest.fn().mockName('sendResponse')
-    listen({ action: '/precommit' }, {}, s)
+    listen({ action: '/precommit', hash: 'xxx' }, { tabId: 123 }, s)
     expect(s).not.toBeCalled()
-    listen({ action: '/commit' }, {}, s)
+    listen({ action: '/commit', hash: 'yyy' }, { tabId: 123 }, s)
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(s).toBeCalled()
+    expect(c).toBeCalled()
+    expect(c).toBeCalledTimes(1)
+    expect(c).toBeCalledWith({ action: '/commit', hash: 'yyy' }, { tabId: 123 }, s)
   })
 })
