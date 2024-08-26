@@ -14,6 +14,9 @@ describe('SequentialRouter', () => {
     expect(s).toBeCalled()
     expect(c).toBeCalled()
     expect(c).toBeCalledTimes(1)
-    expect(c).toBeCalledWith({ action: '/commit', hash: 'yyy' }, { tabId: 123 }, s)
+    expect(c).toBeCalledWith([
+      { action: '/precommit', hash: 'xxx' },
+      { action: '/commit', hash: 'yyy' }
+    ], { tabId: 123 }, s)
   })
 })
