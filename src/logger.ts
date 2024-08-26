@@ -18,7 +18,7 @@ export class Logger {
     }
 
   constructor (
-    public readonly project: string,
+    public readonly project: string | null,
     public level: LogLevel = Logger.global._level
   ) { }
 
@@ -69,28 +69,32 @@ export class Logger {
 
   public debug (...args: unknown[]): void {
     if (this.level > LogLevel.DEBUG) return
-    this.print(LogLevel.DEBUG, args)
+    const _a = this.format(LogLevel.DEBUG, args)
+    console.debug(..._a)
   }
 
   public info (...args: unknown[]): void {
     if (this.level > LogLevel.INFO) return
-    this.print(LogLevel.INFO, args)
+    const _a = this.format(LogLevel.INFO, args)
+    console.info(..._a)
   }
 
   public warn (...args: unknown[]): void {
     if (this.level > LogLevel.WARN) return
-    this.print(LogLevel.WARN, args)
+    const _a = this.format(LogLevel.WARN, args)
+    console.warn(..._a)
   }
 
   public error (...args: unknown[]): void {
     if (this.level > LogLevel.ERROR) return
-    this.print(LogLevel.ERROR, args)
+    const _a = this.format(LogLevel.ERROR, args)
+    console.error(..._a)
   }
 
-  private print (level: LogLevel, args: unknown[]): void {
+  private format (level: LogLevel, args: unknown[]): unknown[] {
     const label = LogLevel[level]
-    const head = `(${this.project}) ${this.emoji.enabled ? `${this.emoji.dict[level]} ` : ''}%c[${label}]`
+    const head = (this.project == null ? '' : `(${this.project}) `) + `${this.emoji.enabled ? `${this.emoji.dict[level]} ` : ''}%c[${label}]`
     const style = this.style.enabled ? this.style.dict[level] : ''
-    console.log(head, style, ...args)
+    return [head, style, ...args]
   }
 }
