@@ -40,9 +40,14 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
 
   private pool: Array<Entry<Parameters<ExtractCallbackSequential<T>>[0]>> = []
 
+  public onNotFound (callback: HandlerOf<ExtractCallbackSequential<T>>): void {
+    this.notfound = callback
+  }
+
   // NotFound handler
-  private readonly notfound: HandlerOf<ExtractCallback<T>> = async function (this: { route: Resolved<U> }, ...args) {
-    // Do nothing
+  private notfound: HandlerOf<ExtractCallbackSequential<T>> = async function (this: { route: Resolved<U> }, ...args) {
+    // This is default 404 handler
+    return { status: 404, message: `Handler for request "${this.route[ActionKey]}" not found` }
   }
 
   // Error handler
@@ -72,7 +77,7 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
   private findHandler (history: Entry[]): [HandlerOf<ExtractCallbackSequential<T>>, number] {
     const exact = this.routes.exact.find(r => r.match(history))
     if (exact != null) return [exact.handelr().bind({ route: exact.match(history) }), exact.actions.length]
-    return this.notfound.bind({ route: { [ActionKey]: history } })
+    return [this.notfound.bind({ route: { [ActionKey]: history } }), this.length]
   }
 
   public listener (): ExtractCallback<T> {
