@@ -7,6 +7,7 @@ describe('SequentialRouter', () => {
     r.on(['/precommit', '/commit'], c)
     const listen = r.listener()
     const s = jest.fn().mockName('sendResponse')
+    listen({ action: '/unused', hash: 'aaa' }, { tabId: 123 }, s)
     listen({ action: '/precommit', hash: 'xxx' }, { tabId: 123 }, s)
     expect(s).not.toBeCalled()
     listen({ action: '/commit', hash: 'yyy' }, { tabId: 123 }, s)

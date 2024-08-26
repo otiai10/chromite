@@ -27,6 +27,7 @@ interface Entry<Data = unknown> {
 }
 
 interface RouteSequentialMatcher<H, U = any> {
+  actions: string[]
   match: (history: Entry[]) => Resolved<U> | undefined
   handelr: () => H
 }
@@ -55,6 +56,7 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
 
   on (actions: string[], callback: HandlerOf<ExtractCallbackSequential<T>>): unknown {
     return this.routes.exact.push({
+      actions,
       match: (history: Entry[]) => {
         const latest = history.slice(-actions.length)
         for (let i = 0; i < actions.length; i++) {
@@ -67,9 +69,9 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
     })
   }
 
-  private findHandler (history: Entry[]): HandlerOf<ExtractCallbackSequential<T>> {
+  private findHandler (history: Entry[]): [HandlerOf<ExtractCallbackSequential<T>>, number] {
     const exact = this.routes.exact.find(r => r.match(history))
-    if (exact != null) return exact.handelr().bind({ route: exact.match(history) })
+    if (exact != null) return [exact.handelr().bind({ route: exact.match(history) }), exact.actions.length]
     return this.notfound.bind({ route: { [ActionKey]: history } })
   }
 
@@ -78,8 +80,8 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
       const sendResponse = this.sendResponse(...args)
       this.resolver(...args).then(route => {
         this.pool.push({ [ActionKey]: route[ActionKey], data: args[0] })
-        const fn = this.findHandler(this.pool.slice(-this.length))
-        const stacked = this.pool.map(e => e.data) as Array<Parameters<ExtractCallbackSequential<T>>[0]>
+        const [fn, len] = this.findHandler(this.pool.slice(-this.length))
+        const stacked = this.pool.map(e => e.data).slice(-len) as Array<Parameters<ExtractCallbackSequential<T>>[0]>
         const _args = [stacked, ...args.slice(1)] as Parameters<ExtractCallbackSequential<T>>
         const res = fn(..._args)
         if (res instanceof Promise) {
