@@ -7,7 +7,7 @@ describe('Router', () => {
   })
 
   it('should be constructed by default resolver if not given', async () => {
-    const r = new Router()
+    const r = new Router<chrome.runtime.ExtensionMessageEvent>()
     const callback = jest.fn().mockName('callback').mockImplementation((message: { name: string }) => {
       return { message: `Hello, ${message.name}` }
     })
@@ -25,7 +25,7 @@ describe('Router', () => {
 
   describe('on', () => {
     it('should register a route', async () => {
-      const r = new Router(async (m: any) => await Promise.resolve({ __action__: m.action }))
+      const r = new Router<chrome.runtime.ExtensionMessageEvent>(async (m: any) => await Promise.resolve({ __action__: m.action }))
       const callback = jest.fn().mockName('callback').mockImplementation((message: { name: string }) => {
         return { message: `Hello, ${message.name}` }
       })
@@ -38,7 +38,7 @@ describe('Router', () => {
     })
 
     it('should parse {} in action and path parameters', async () => {
-      const r = new Router()
+      const r = new Router<chrome.runtime.ExtensionMessageEvent>()
       const fn = function (this: { route: { name: string } }, message: any): any {
         return { message: `Hello, ${this.route.name}!` }
       }
@@ -55,7 +55,7 @@ describe('Router', () => {
 
   describe('default NotFound handler', () => {
     it('should send response with status:404', async () => {
-      const r = new Router()
+      const r = new Router<chrome.runtime.ExtensionMessageEvent>()
       const sendResponse = jest.fn().mockName('sendResponse')
       r.listener()({ action: '/notfound' }, {}, sendResponse)
       await new Promise(resolve => setTimeout(resolve, 0))
@@ -64,7 +64,7 @@ describe('Router', () => {
   })
   describe('onNotFound', () => {
     it('should overwrite a handler for not found', async () => {
-      const r = new Router()
+      const r = new Router<chrome.runtime.ExtensionMessageEvent>()
       const callback = jest.fn().mockName('callback').mockImplementation(async function (this: any) {
         return { message: 'See you yesterday ;)', status: 5004 }
       })

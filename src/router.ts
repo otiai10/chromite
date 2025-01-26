@@ -5,8 +5,8 @@ export type Resolved<U = Record<string, unknown>> = {
 } & U
 
 // type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
-export type RoutingTargetEvent = chrome.events.Event<any> | chrome.events.EventWithRequiredFilterInAddListener<any>
-export type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : (T extends chrome.events.EventWithRequiredFilterInAddListener<infer V> ? V : never)
+export type RoutingTargetEvent = chrome.events.Event<(...args: any[]) => any> | chrome.webRequest.WebRequestEvent<(...args: any[]) => any, string[]>;
+export type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : (T extends chrome.webRequest.WebRequestEvent<infer V, any> ? V : never)
 export type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | undefined> | undefined)
 export type Resolver<Callback extends (...args: any[]) => any, U = Record<string, unknown>> = (...args: Parameters<Callback>) => Promise<Resolved<U>>
 

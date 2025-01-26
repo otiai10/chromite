@@ -8,16 +8,21 @@ import {
   DefaultResolver
 } from './router'
 
-// もういやや、TypeScriptの型パズル...
-export type ExtractCallbackSequential<T> =
-    T extends chrome.events.Event<infer U extends (...args: any[]) => any> ? (
-      stack: Array<Parameters<U>[0]>,
-      ...args: U extends (first: any, ...rest: infer V) => any ? V : never
-    ) => ReturnType<U> :
-        (T extends chrome.events.EventWithRequiredFilterInAddListener<infer V> ? (
-          stack: V extends (...args: any) => any ? Array<Parameters<V>[0]> : never,
-          ...args: V extends (first: any, ...rest: infer W) => any ? W : never
-        ) => V extends (...args: any[]) => any ? ReturnType<V> : never : never)
+export type StackCallback<F extends Function> =
+  F extends (first: any, ...rest: infer V) => any ?
+    (stack: Array<Parameters<F>[0]>, ...args: V) => ReturnType<F>
+  : F extends (first: any) => any ?
+    (stack: Array<Parameters<F>[0]>) => ReturnType<F>
+  : never;
+
+type EventTypes = chrome.events.Event<any> | chrome.webRequest.WebRequestEvent<any, any>
+
+export type ExtractCallbackSequential<T extends EventTypes> =
+  T extends chrome.events.Event<infer U> ?
+    StackCallback<U>
+  : T extends chrome.webRequest.WebRequestEvent<infer U, any> ?
+    StackCallback<U>
+  : never;
 
 const WildCard = '*'
 

@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/otiai10/chromite#readme",
   "devDependencies": {
-    "@types/chrome": "^0.0.233",
+    "@types/chrome": "^0.0.299",
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "eslint": "^8.0.1",
