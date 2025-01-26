@@ -94,4 +94,26 @@ describe('Router', () => {
       expect(sendResponse).toBeCalledWith({ status: 500, message: 'See you yesterday ;)', error: new Error('Something wrong') })
     })
   })
+
+  describe('should accept all the event types provided by chrome APIs', () => {
+    // runtime
+    new Router<chrome.runtime.ExtensionMessageEvent>();
+    new Router<chrome.runtime.ExtensionConnectEvent>();
+    // tabs
+    new Router<chrome.tabs.TabActivatedEvent>();
+    new Router<chrome.tabs.TabAttachedEvent>();
+    new Router<chrome.tabs.TabCreatedEvent>();
+    new Router<chrome.tabs.TabDetachedEvent>();
+    new Router<chrome.tabs.TabHighlightedEvent>();
+    // webNavigation
+    new Router<chrome.webNavigation.WebNavigationFramedEvent>();
+    new Router<chrome.webNavigation.WebNavigationSourceEvent>();
+    new Router<chrome.webNavigation.WebNavigationParentedEvent>();
+    new Router<chrome.webNavigation.WebNavigationTransitionalEvent>();
+    // webRequest
+    new Router<chrome.webRequest.WebRequestBodyEvent>();
+    new Router<chrome.webRequest.WebRequestHeadersEvent>();
+    // alarms
+    new Router<chrome.alarms.AlarmEvent>();
+  })
 })
