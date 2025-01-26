@@ -2,7 +2,7 @@ import { Router } from '../../src'
 
 describe('Router', () => {
   it('should be a class', () => {
-    const r = new Router(async () => await Promise.resolve({ __action__: '/foobar' }))
+    const r = new Router(() => ({ __action__: '/foobar' }));
     expect(r).toBeInstanceOf(Router)
   })
 
@@ -114,6 +114,8 @@ describe('Router', () => {
     new Router<chrome.webRequest.WebRequestBodyEvent>();
     new Router<chrome.webRequest.WebRequestHeadersEvent>();
     // alarms
-    new Router<chrome.alarms.AlarmEvent>();
+    new Router<chrome.alarms.AlarmEvent>((alarm: chrome.alarms.Alarm) => {
+      return { __action__: alarm.name };
+    });
   })
 })

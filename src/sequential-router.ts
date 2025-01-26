@@ -88,7 +88,8 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
   public listener (): ExtractCallback<T> {
     return ((...args: Parameters<ExtractCallback<T>>) => {
       const sendResponse = this.sendResponse(...args)
-      this.resolver(...args).then(route => {
+      const resolved = this.resolver(...args);
+      (resolved instanceof Promise ? resolved : Promise.resolve(resolved)).then(route => {
         this.pool.push({ [ActionKey]: route[ActionKey], data: args[0] })
         const [fn, len] = this.findHandler(this.pool.slice(-this.length))
         const stacked = this.pool.map(e => e.data).slice(-len) as Array<Parameters<ExtractCallbackSequential<T>>[0]>
