@@ -8,21 +8,22 @@ import {
   DefaultResolver
 } from './router'
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export type StackCallback<F extends Function> =
   F extends (first: any, ...rest: infer V) => any ?
-    (stack: Array<Parameters<F>[0]>, ...args: V) => ReturnType<F>
-  : F extends (first: any) => any ?
-    (stack: Array<Parameters<F>[0]>) => ReturnType<F>
-  : never;
+      (stack: Array<Parameters<F>[0]>, ...args: V) => ReturnType<F>
+    : F extends (first: any) => any ?
+        (stack: Array<Parameters<F>[0]>) => ReturnType<F>
+      : never
 
 type EventTypes = chrome.events.Event<any> | chrome.webRequest.WebRequestEvent<any, any>
 
 export type ExtractCallbackSequential<T extends EventTypes> =
   T extends chrome.events.Event<infer U> ?
     StackCallback<U>
-  : T extends chrome.webRequest.WebRequestEvent<infer U, any> ?
-    StackCallback<U>
-  : never;
+    : T extends chrome.webRequest.WebRequestEvent<infer U, any> ?
+      StackCallback<U>
+      : never
 
 const WildCard = '*'
 

@@ -2,13 +2,13 @@ import { ActionKey, ActionKeyAlias } from './keys'
 
 export type Resolved<U = Record<string, unknown>> = {
   [ActionKey]: string
-} & U;
+} & U
 
 // type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
-export type RoutingTargetEvent = chrome.events.Event<(...args: any[]) => any> | chrome.webRequest.WebRequestEvent<(...args: any[]) => any, string[]>;
+export type RoutingTargetEvent = chrome.events.Event<(...args: any[]) => any> | chrome.webRequest.WebRequestEvent<(...args: any[]) => any, string[]>
 export type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : (T extends chrome.webRequest.WebRequestEvent<infer V, any> ? V : never)
 export type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | undefined> | undefined)
-export type Resolver<Callback extends (...args: any[]) => any, U = Record<string, unknown>> = (...args: Parameters<Callback>) => (Resolved<U> | Promise<Resolved<U>>);
+export type Resolver<Callback extends (...args: any[]) => any, U = Record<string, unknown>> = (...args: Parameters<Callback>) => (Resolved<U> | Promise<Resolved<U>>)
 
 interface RouteMatcher<H, U = any> {
   match: (action: string) => Resolved<U> | undefined
@@ -18,7 +18,7 @@ interface RouteMatcher<H, U = any> {
 export const DefaultResolver = <U = any>(...args): Resolved<U> => {
   const alias = ActionKeyAlias.find(a => args[0][a] !== undefined)
   if (alias === undefined) return { [ActionKey]: '__notfound__', ...args[0] }
-  return { [ActionKey]: args[0][alias], ...args[0] };
+  return { [ActionKey]: args[0][alias], ...args[0] }
 }
 
 export class Router<T extends RoutingTargetEvent, U = Record<string, unknown>> {

@@ -1,8 +1,9 @@
+/* eslint-disable no-new */
 import { Router } from '../../src'
 
 describe('Router', () => {
   it('should be a class', () => {
-    const r = new Router(() => ({ __action__: '/foobar' }));
+    const r = new Router(() => ({ __action__: '/foobar' }))
     expect(r).toBeInstanceOf(Router)
   })
 
@@ -97,25 +98,25 @@ describe('Router', () => {
 
   describe('should accept all the event types provided by chrome APIs', () => {
     // runtime
-    new Router<chrome.runtime.ExtensionMessageEvent>();
-    new Router<chrome.runtime.ExtensionConnectEvent>();
+    new Router<chrome.runtime.ExtensionMessageEvent>()
+    new Router<chrome.runtime.ExtensionConnectEvent>()
     // tabs
-    new Router<chrome.tabs.TabActivatedEvent>();
-    new Router<chrome.tabs.TabAttachedEvent>();
-    new Router<chrome.tabs.TabCreatedEvent>();
-    new Router<chrome.tabs.TabDetachedEvent>();
-    new Router<chrome.tabs.TabHighlightedEvent>();
+    new Router<chrome.tabs.TabActivatedEvent>()
+    new Router<chrome.tabs.TabAttachedEvent>()
+    new Router<chrome.tabs.TabCreatedEvent>()
+    new Router<chrome.tabs.TabDetachedEvent>()
+    new Router<chrome.tabs.TabHighlightedEvent>()
     // webNavigation
-    new Router<chrome.webNavigation.WebNavigationFramedEvent>();
-    new Router<chrome.webNavigation.WebNavigationSourceEvent>();
-    new Router<chrome.webNavigation.WebNavigationParentedEvent>();
-    new Router<chrome.webNavigation.WebNavigationTransitionalEvent>();
+    new Router<chrome.webNavigation.WebNavigationFramedEvent>()
+    new Router<chrome.webNavigation.WebNavigationSourceEvent>()
+    new Router<chrome.webNavigation.WebNavigationParentedEvent>()
+    new Router<chrome.webNavigation.WebNavigationTransitionalEvent>()
     // webRequest
-    new Router<chrome.webRequest.WebRequestBodyEvent>();
-    new Router<chrome.webRequest.WebRequestHeadersEvent>();
+    new Router<chrome.webRequest.WebRequestBodyEvent>()
+    new Router<chrome.webRequest.WebRequestHeadersEvent>()
     // alarms
     new Router<chrome.alarms.AlarmEvent>((alarm: chrome.alarms.Alarm) => {
-      return { __action__: alarm.name };
-    });
+      return { __action__: alarm.name }
+    })
   })
 })

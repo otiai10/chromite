@@ -7,11 +7,12 @@ describe('SequentialRouter', () => {
     r.on(['/precommit', '/commit'], c)
     const listen = r.listener()
     const sendResponse = jest.fn().mockName('sendResponse')
-    const sender = { tab: { id: 123 } } as chrome.runtime.MessageSender;
-    listen({ action: '/unused', hash: 'aaa' }, sender, sendResponse);
-    listen({ action: '/precommit', hash: 'xxx' }, sender, sendResponse);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const sender = { tab: { id: 123 } } as chrome.runtime.MessageSender
+    listen({ action: '/unused', hash: 'aaa' }, sender, sendResponse)
+    listen({ action: '/precommit', hash: 'xxx' }, sender, sendResponse)
     expect(sendResponse).not.toBeCalled()
-    listen({ action: '/commit',    hash: 'yyy' }, sender, sendResponse);
+    listen({ action: '/commit', hash: 'yyy' }, sender, sendResponse)
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(sendResponse).toBeCalled()
     expect(c).toBeCalled()
