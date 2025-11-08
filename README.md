@@ -51,10 +51,30 @@ router.onNotFound(() => ({ message: "Not found" }));
 chrome.runtime.onMessage.addListener(router.listener());
 
 const client = new Client(chrome.runtime);
-const logger = new Logger("chromite-demo", LogLevel.INFO);
+const logger = Logger.get("chromite-demo", { level: LogLevel.INFO });
 
 const users = await client.send("/users/list");
 logger.info("Loaded users", users);
+```
+
+### Logger tips
+
+```ts
+// Reuse the same logger for a project namespace.
+const logger = Logger.get("popup");
+
+// Raise verbosity for every registered logger.
+Logger.setLevel(LogLevel.DEBUG);
+
+// Tweak shared visual configuration.
+Logger.setEmoji(true, {
+  [LogLevel.INFO]: "✨"
+});
+Logger.setStyle(true, {
+  [LogLevel.ERROR]: "color:white; background-color:#d93025; font-weight:bold;"
+});
+
+logger.error("Failed to fetch", { status: 500 });
 ```
 
 ## Core Concepts
