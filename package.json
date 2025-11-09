@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf lib tests/e2e/app/dist",
     "build": "tsc --declaration --outDir lib ./src/index.ts",
-    "build:e2e": "tsc --outDir tests/e2e/app/dist ./tests/e2e/app/src/*.ts",
+    "build:e2e": "esbuild tests/e2e/app/src/background.ts --bundle --format=iife --platform=browser --target=chrome115 --outfile=tests/e2e/app/dist/background.js && esbuild tests/e2e/app/src/content.ts --bundle --format=iife --platform=browser --target=chrome115 --outfile=tests/e2e/app/dist/content.js",
     "test": "jest --config tests/spec/jest.config.ts",
     "test:e2e": "npm run build:e2e && jest --config tests/e2e/jest.config.ts",
     "lint": "eslint src/*.ts tests/**/*.{ts,js}"
@@ -33,6 +33,7 @@
     "@types/chrome": "^0.0.299",
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
+    "esbuild": "^0.26.0",
     "eslint": "^8.0.1",
     "eslint-config-standard-with-typescript": "^37.0.0",
     "eslint-plugin-import": "^2.25.2",
