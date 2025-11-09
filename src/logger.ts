@@ -28,15 +28,17 @@ const defaultStyleDict: Record<LogLevel, string> = {
  */
 export class Logger {
   private static readonly nullProjectKey = Symbol('logger:null-project')
-  private static readonly registry: Map<string | symbol, Logger> = new Map()
-  private static emojiConfig: {
+  private static readonly registry = new Map<string | symbol, Logger>()
+
+  private static readonly emojiConfig: {
     enabled: boolean
     dict: Record<LogLevel, string>
   } = {
       enabled: false,
       dict: { ...defaultEmojiDict }
     }
-  private static styleConfig: {
+
+  private static readonly styleConfig: {
     enabled: boolean
     dict: Record<LogLevel, string>
   } = {

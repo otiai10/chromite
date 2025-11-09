@@ -14,7 +14,7 @@ module.exports = async function () {
   ]
 
   // Add --no-sandbox flag in CI environments (e.g., GitHub Actions)
-  if (process.env.CI) {
+  if (process.env.CI === 'true') {
     args.push('--no-sandbox', '--disable-setuid-sandbox')
   }
 
