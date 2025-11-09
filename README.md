@@ -67,10 +67,10 @@ const logger = Logger.get("popup");
 Logger.setLevel(LogLevel.DEBUG);
 
 // Tweak shared visual configuration.
-Logger.setEmoji(true, {
+Logger.setEmoji({
   [LogLevel.INFO]: "✨"
 });
-Logger.setStyle(true, {
+Logger.setStyle({
   [LogLevel.ERROR]: "color:white; background-color:#d93025; font-weight:bold;"
 });
 

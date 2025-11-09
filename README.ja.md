@@ -60,10 +60,10 @@ const logger = Logger.get("popup");
 Logger.setLevel(LogLevel.DEBUG);
 
 // 絵文字とスタイルを共有設定で上書き
-Logger.setEmoji(true, {
+Logger.setEmoji({
   [LogLevel.INFO]: "✨"
 });
-Logger.setStyle(true, {
+Logger.setStyle({
   [LogLevel.ERROR]: "color:white; background-color:#d93025; font-weight:bold;"
 });
 
