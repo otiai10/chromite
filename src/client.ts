@@ -56,5 +56,5 @@ export class Client<MessageModule = (typeof chrome.runtime | typeof chrome.tabs)
 
   // Shorthands
   public static _ = new Client({ module: chrome.runtime })
-  public static $ = Client.tab
+  public static $ = (tab: chrome.tabs.Tab | number): Client<typeof chrome.tabs> => Client.tab(tab)
 }

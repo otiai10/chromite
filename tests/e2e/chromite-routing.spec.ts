@@ -1,7 +1,27 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
+import type { Page } from 'puppeteer'
+
+type BridgeMode = 'client' | 'raw'
+
+interface BridgeOptions {
+  action?: string
+  payload?: Record<string, unknown>
+  mode?: BridgeMode
+  message?: Record<string, unknown>
+  timeout?: number
+}
+
+interface BridgeResponse {
+  type: 'chromite-e2e:response'
+  requestId: string
+  ok: boolean
+  data?: any
+  error?: unknown
+}
+
 describe('Chromite routing E2E', () => {
-  let page
+  let page: Page
 
   beforeAll(async () => {
     page = await globalThis.__BROWSER_GLOBAL__.newPage()
@@ -12,8 +32,8 @@ describe('Chromite routing E2E', () => {
     await page.close()
   })
 
-  const bridgeRequest = async (options) => {
-    return page.evaluate(async (opts) => {
+  const bridgeRequest = async <T = any>(options: BridgeOptions): Promise<T> => {
+    return await page.evaluate(async (opts: BridgeOptions) => {
       const requestId = (globalThis.crypto?.randomUUID?.() ?? `req-${Date.now()}-${Math.random()}`)
       return await new Promise((resolve, reject) => {
         const cleanup = () => {
@@ -21,13 +41,13 @@ describe('Chromite routing E2E', () => {
           clearTimeout(timeout)
         }
 
-        const handle = (event) => {
+        const handle = (event: MessageEvent<BridgeResponse | null>) => {
           if (event.source !== window) return
           const detail = event.data
           if (detail == null || detail.type !== 'chromite-e2e:response') return
           if (detail.requestId !== requestId) return
           cleanup()
-          if (detail.ok === true) {
+          if (detail.ok) {
             resolve(detail.data)
           } else {
             const message = typeof detail.error === 'string' ? detail.error : 'unknown error'
@@ -50,7 +70,7 @@ describe('Chromite routing E2E', () => {
           message: opts.message
         }, '*')
       })
-    }, options)
+    }, options) as T
   }
 
   it('responds to /health/ping with status ok', async () => {

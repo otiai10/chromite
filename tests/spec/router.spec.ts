@@ -1,6 +1,21 @@
 /* eslint-disable no-new */
 import { Router } from '../../src'
 
+type RuntimeMessageEvent = typeof chrome.runtime.onMessage
+type RuntimeConnectEvent = typeof chrome.runtime.onConnect
+type TabsActivatedEvent = typeof chrome.tabs.onActivated
+type TabsAttachedEvent = typeof chrome.tabs.onAttached
+type TabsCreatedEvent = typeof chrome.tabs.onCreated
+type TabsDetachedEvent = typeof chrome.tabs.onDetached
+type TabsHighlightedEvent = typeof chrome.tabs.onHighlighted
+type WebNavigationCommittedEvent = typeof chrome.webNavigation.onCommitted
+type WebNavigationHistoryStateUpdatedEvent = typeof chrome.webNavigation.onHistoryStateUpdated
+type WebNavigationTabReplacedEvent = typeof chrome.webNavigation.onTabReplaced
+type WebNavigationCreatedTargetEvent = typeof chrome.webNavigation.onCreatedNavigationTarget
+type WebRequestBodyEvent = typeof chrome.webRequest.onBeforeRequest
+type WebRequestHeadersEvent = typeof chrome.webRequest.onBeforeSendHeaders
+type AlarmsEvent = typeof chrome.alarms.onAlarm
+
 describe('Router', () => {
   it('should be a class', () => {
     const r = new Router(() => ({ __action__: '/foobar' }))
@@ -8,7 +23,7 @@ describe('Router', () => {
   })
 
   it('should be constructed by default resolver if not given', async () => {
-    const r = new Router<chrome.runtime.ExtensionMessageEvent>()
+    const r = new Router<RuntimeMessageEvent>()
     const callback = jest.fn().mockName('callback').mockImplementation((message: { name: string }) => {
       return { message: `Hello, ${message.name}` }
     })
@@ -18,7 +33,7 @@ describe('Router', () => {
     await new Promise(resolve => setTimeout(resolve, 0))
   })
   it('should be constructed with EventWithRequiredFilterInAddListener generics', async () => {
-    const r = new Router<chrome.webRequest.WebRequestBodyEvent>(async (details: chrome.webRequest.WebRequestBodyDetails) => {
+    const r = new Router<WebRequestBodyEvent>(async (details: chrome.webRequest.OnBeforeRequestDetails) => {
       return { __action__: '/test' }
     })
     expect(r).toBeInstanceOf(Router)
@@ -26,7 +41,7 @@ describe('Router', () => {
 
   describe('on', () => {
     it('should register a route', async () => {
-      const r = new Router<chrome.runtime.ExtensionMessageEvent>(async (m: any) => await Promise.resolve({ __action__: m.action }))
+      const r = new Router<RuntimeMessageEvent>(async (m: any) => await Promise.resolve({ __action__: m.action }))
       const callback = jest.fn().mockName('callback').mockImplementation((message: { name: string }) => {
         return { message: `Hello, ${message.name}` }
       })
@@ -39,7 +54,7 @@ describe('Router', () => {
     })
 
     it('should parse {} in action and path parameters', async () => {
-      const r = new Router<chrome.runtime.ExtensionMessageEvent>()
+      const r = new Router<RuntimeMessageEvent>()
       const fn = function (this: { route: { name: string } }, message: any): any {
         return { message: `Hello, ${this.route.name}!` }
       }
@@ -56,7 +71,7 @@ describe('Router', () => {
 
   describe('default NotFound handler', () => {
     it('should send response with status:404', async () => {
-      const r = new Router<chrome.runtime.ExtensionMessageEvent>()
+      const r = new Router<RuntimeMessageEvent>()
       const sendResponse = jest.fn().mockName('sendResponse')
       r.listener()({ action: '/notfound' }, {}, sendResponse)
       await new Promise(resolve => setTimeout(resolve, 0))
@@ -65,7 +80,7 @@ describe('Router', () => {
   })
   describe('onNotFound', () => {
     it('should overwrite a handler for not found', async () => {
-      const r = new Router<chrome.runtime.ExtensionMessageEvent>()
+      const r = new Router<RuntimeMessageEvent>()
       const callback = jest.fn().mockName('callback').mockImplementation(async function (this: any) {
         return { message: 'See you yesterday ;)', status: 5004 }
       })
@@ -80,7 +95,7 @@ describe('Router', () => {
 
   describe('onError', () => {
     it('should overwrite a handler for error', async () => {
-      const r = new Router<chrome.runtime.ExtensionMessageEvent, { status: number }>()
+      const r = new Router<RuntimeMessageEvent, { status: number }>()
       const onerror = jest.fn().mockName('callback').mockImplementation(async function (this: any) {
         return { message: 'See you yesterday ;)', status: 500, error: this.error }
       })
@@ -98,24 +113,24 @@ describe('Router', () => {
 
   describe('should accept all the event types provided by chrome APIs', () => {
     // runtime
-    new Router<chrome.runtime.ExtensionMessageEvent>()
-    new Router<chrome.runtime.ExtensionConnectEvent>()
+    new Router<RuntimeMessageEvent>()
+    new Router<RuntimeConnectEvent>()
     // tabs
-    new Router<chrome.tabs.TabActivatedEvent>()
-    new Router<chrome.tabs.TabAttachedEvent>()
-    new Router<chrome.tabs.TabCreatedEvent>()
-    new Router<chrome.tabs.TabDetachedEvent>()
-    new Router<chrome.tabs.TabHighlightedEvent>()
+    new Router<TabsActivatedEvent>()
+    new Router<TabsAttachedEvent>()
+    new Router<TabsCreatedEvent>()
+    new Router<TabsDetachedEvent>()
+    new Router<TabsHighlightedEvent>()
     // webNavigation
-    new Router<chrome.webNavigation.WebNavigationFramedEvent>()
-    new Router<chrome.webNavigation.WebNavigationSourceEvent>()
-    new Router<chrome.webNavigation.WebNavigationParentedEvent>()
-    new Router<chrome.webNavigation.WebNavigationTransitionalEvent>()
+    new Router<WebNavigationCommittedEvent>()
+    new Router<WebNavigationHistoryStateUpdatedEvent>()
+    new Router<WebNavigationTabReplacedEvent>()
+    new Router<WebNavigationCreatedTargetEvent>()
     // webRequest
-    new Router<chrome.webRequest.WebRequestBodyEvent>()
-    new Router<chrome.webRequest.WebRequestHeadersEvent>()
+    new Router<WebRequestBodyEvent>()
+    new Router<WebRequestHeadersEvent>()
     // alarms
-    new Router<chrome.alarms.AlarmEvent>((alarm: chrome.alarms.Alarm) => {
+    new Router<AlarmsEvent>((alarm: chrome.alarms.Alarm) => {
       return { __action__: alarm.name }
     })
   })

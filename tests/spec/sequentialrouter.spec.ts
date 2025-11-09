@@ -1,8 +1,10 @@
 import { SequentialRouter } from '../../src/sequential-router'
 
+type RuntimeMessageEvent = typeof chrome.runtime.onMessage
+
 describe('SequentialRouter', () => {
   it('should register a route', async () => {
-    const r = new SequentialRouter<chrome.runtime.ExtensionMessageEvent>(4, async (m: any) => await Promise.resolve({ __action__: m.action }))
+    const r = new SequentialRouter<RuntimeMessageEvent>(4, async (m: any) => await Promise.resolve({ __action__: m.action }))
     const c = jest.fn().mockName('callback')
     r.on(['/precommit', '/commit'], c)
     const listen = r.listener()

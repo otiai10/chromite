@@ -148,7 +148,7 @@ export class Logger {
    * @param level Desired {@link LogLevel}.
    * @returns The current {@link Logger} for chaining.
    */
-  public setLevel (level: LogLevel): Logger {
+  public setLevel (level: LogLevel): this {
     this.level = level
     return this
   }

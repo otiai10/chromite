@@ -10,9 +10,10 @@ describe('Client', () => {
 })
 
 describe('_', () => {
-  chrome.runtime.sendMessage.mockImplementation(async (extId: string | null | undefined, message: any) => {
-    const name: string = message.name
-    return await Promise.resolve({ greet: `Hello, ${name}!` })
+  // jest-chrome の型は Promise 戻り値を void と推論するため lint を抑制
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  chrome.runtime.sendMessage.mockImplementation(async (extId: string | null | undefined, message: { name: string }) => {
+    return await Promise.resolve({ greet: `Hello, ${message.name}!` })
   })
   it('should be an instance of Client', () => {
     expect(Client._).toBeInstanceOf(Client)
@@ -25,9 +26,9 @@ describe('_', () => {
 })
 
 describe('$', () => {
-  chrome.tabs.sendMessage.mockImplementation(async (tabId: number, message: any) => {
-    const name: string = message.name
-    return await Promise.resolve({ greet: `Hello, ${name}!` })
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  chrome.tabs.sendMessage.mockImplementation(async (tabId: number, message: { name: string }) => {
+    return await Promise.resolve({ greet: `Hello, ${message.name}!` })
   })
   it('should be an instance of Client', () => {
     expect(Client.$).toBeInstanceOf(Function)
