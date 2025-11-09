@@ -3,18 +3,8 @@ import { Logger, LogLevel } from '../../src/logger'
 describe('Logger', () => {
   afterEach(() => {
     Logger.setLevel(LogLevel.INFO)
-    Logger.setEmoji(false, {
-      [LogLevel.DEBUG]: '🐞',
-      [LogLevel.INFO]: '💡',
-      [LogLevel.WARN]: '⚠️',
-      [LogLevel.ERROR]: '🚨'
-    })
-    Logger.setStyle(true, {
-      [LogLevel.DEBUG]: 'color:WHITE; background-color:CORAL; font-weight:BOLD;',
-      [LogLevel.INFO]: 'color:WHITE; background-color:GREY;  font-weight:BOLD;',
-      [LogLevel.WARN]: 'color:BLACK; background-color:GOLD;  font-weight:BOLD;',
-      [LogLevel.ERROR]: 'color:WHITE; background-color:RED;   font-weight:BOLD;'
-    })
+    Logger.setEmoji(false) // Disable emoji
+    Logger.setStyle(true) // Enable style with defaults
   })
 
   describe('new', () => {
@@ -69,28 +59,45 @@ describe('Logger', () => {
   describe('visual configuration', () => {
     it('should apply global emoji settings to all loggers', () => {
       console.info = jest.fn().mockName('info')
-      Logger.setEmoji(true, {
-        [LogLevel.DEBUG]: '🐞',
-        [LogLevel.INFO]: '✨',
-        [LogLevel.WARN]: '⚠️',
-        [LogLevel.ERROR]: '🚨'
+      Logger.setEmoji({
+        [LogLevel.INFO]: '✨'
       })
       const logger = Logger.get('ui')
       logger.info('hello')
       expect(console.info).toBeCalledWith('(ui) ✨ %c[INFO]', 'color:WHITE; background-color:GREY;  font-weight:BOLD;', 'hello')
     })
 
-    it('should disable style output when global style is disabled', () => {
+    it('should disable emoji when false is passed', () => {
+      console.info = jest.fn().mockName('info')
+      Logger.setEmoji({ [LogLevel.INFO]: '✨' })
+      Logger.setEmoji(false)
+      const logger = Logger.get('ui-no-emoji')
+      logger.info('hello')
+      expect(console.info).toBeCalledWith('(ui-no-emoji) %c[INFO]', 'color:WHITE; background-color:GREY;  font-weight:BOLD;', 'hello')
+    })
+
+    it('should enable emoji with defaults when true is passed', () => {
+      console.info = jest.fn().mockName('info')
+      Logger.setEmoji(true)
+      const logger = Logger.get('ui-default-emoji-true')
+      logger.info('hello')
+      expect(console.info).toBeCalledWith('(ui-default-emoji-true) 💡 %c[INFO]', 'color:WHITE; background-color:GREY;  font-weight:BOLD;', 'hello')
+    })
+
+    it('should disable style output when false is passed', () => {
       console.warn = jest.fn().mockName('warn')
-      Logger.setStyle(false, {
-        [LogLevel.DEBUG]: 'color:WHITE; background-color:CORAL; font-weight:BOLD;',
-        [LogLevel.INFO]: 'color:WHITE; background-color:GREY;  font-weight:BOLD;',
-        [LogLevel.WARN]: 'color:BLACK; background-color:GOLD;  font-weight:BOLD;',
-        [LogLevel.ERROR]: 'color:WHITE; background-color:RED;   font-weight:BOLD;'
-      })
-      const logger = Logger.get('ui')
+      Logger.setStyle(false)
+      const logger = Logger.get('ui-no-style')
       logger.warn('something')
-      expect(console.warn).toBeCalledWith('(ui) %c[WARN]', '', 'something')
+      expect(console.warn).toBeCalledWith('(ui-no-style) %c[WARN]', '', 'something')
+    })
+
+    it('should enable style with defaults when true is passed', () => {
+      console.warn = jest.fn().mockName('warn')
+      Logger.setStyle(true)
+      const logger = Logger.get('ui-default-style-true')
+      logger.warn('something')
+      expect(console.warn).toBeCalledWith('(ui-default-style-true) %c[WARN]', 'color:BLACK; background-color:GOLD;  font-weight:BOLD;', 'something')
     })
   })
 })

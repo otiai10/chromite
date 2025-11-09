@@ -99,29 +99,47 @@ export class Logger {
 
   /**
    * Applies global emoji settings that affect every logger instance.
-   * @param enabled Whether emoji prefixes should be rendered.
-   * @param dict Partial dictionary overriding per-level emoji.
+   * @param dict Emoji dictionary to enable and customize emojis. Pass `false` to disable, `true` to enable with defaults, or pass a partial dictionary to customize.
    * @returns void
    */
-  public static setEmoji (enabled: boolean, dict: Record<LogLevel, string>): void {
-    Logger.emojiConfig.enabled = enabled
-    Logger.emojiConfig.dict = {
-      ...Logger.emojiConfig.dict,
-      ...dict
+  public static setEmoji (enabled: boolean): void
+  public static setEmoji (dict: Partial<Record<LogLevel, string>>): void
+  public static setEmoji (dict: Partial<Record<LogLevel, string>> | boolean): void {
+    if (dict === false) {
+      Logger.emojiConfig.enabled = false
+      return
+    }
+    Logger.emojiConfig.enabled = true
+    if (dict === true || dict == null) {
+      Logger.emojiConfig.dict = { ...defaultEmojiDict }
+    } else {
+      Logger.emojiConfig.dict = {
+        ...defaultEmojiDict,
+        ...dict
+      }
     }
   }
 
   /**
    * Applies global CSS styles used by console formatting.
-   * @param enabled Whether CSS styling should be applied via `%c`.
-   * @param dict Partial dictionary overriding per-level style strings.
+   * @param dict Style dictionary to enable and customize styles. Pass `false` to disable, `true` to enable with defaults, or pass a partial dictionary to customize.
    * @returns void
    */
-  public static setStyle (enabled: boolean, dict: Record<LogLevel, string>): void {
-    Logger.styleConfig.enabled = enabled
-    Logger.styleConfig.dict = {
-      ...Logger.styleConfig.dict,
-      ...dict
+  public static setStyle (enabled: boolean): void
+  public static setStyle (dict: Partial<Record<LogLevel, string>>): void
+  public static setStyle (dict: Partial<Record<LogLevel, string>> | boolean): void {
+    if (dict === false) {
+      Logger.styleConfig.enabled = false
+      return
+    }
+    Logger.styleConfig.enabled = true
+    if (dict === true || dict == null) {
+      Logger.styleConfig.dict = { ...defaultStyleDict }
+    } else {
+      Logger.styleConfig.dict = {
+        ...defaultStyleDict,
+        ...dict
+      }
     }
   }
 
