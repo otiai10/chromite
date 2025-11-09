@@ -52,32 +52,36 @@ async function sendRawMessage (message: Record<string, unknown>): Promise<any> {
   })
 }
 
-window.addEventListener('message', async (event) => {
+window.addEventListener('message', (event) => {
   if (event.source !== window) return
   const data = event.data as BridgeRequest
   if (data?.type !== 'chromite-e2e') return
 
-  try {
-    const mode = data.mode ?? 'client'
-    let response
-    if (mode === 'raw') {
-      response = await sendRawMessage(data.message ?? {})
-    } else {
-      if (typeof data.action !== 'string') throw new Error('action is required')
-      response = await sendViaClient(data.action, data.payload)
+  const handleRequest = async (): Promise<void> => {
+    try {
+      const mode = data.mode ?? 'client'
+      let response
+      if (mode === 'raw') {
+        response = await sendRawMessage(data.message ?? {})
+      } else {
+        if (typeof data.action !== 'string') throw new Error('action is required')
+        response = await sendViaClient(data.action, data.payload)
+      }
+      window.postMessage({
+        type: 'chromite-e2e:response',
+        requestId: data.requestId,
+        ok: true,
+        data: response
+      }, '*')
+    } catch (error: any) {
+      window.postMessage({
+        type: 'chromite-e2e:response',
+        requestId: data.requestId,
+        ok: false,
+        error: error?.message ?? String(error)
+      }, '*')
     }
-    window.postMessage({
-      type: 'chromite-e2e:response',
-      requestId: data.requestId,
-      ok: true,
-      data: response
-    }, '*')
-  } catch (error: any) {
-    window.postMessage({
-      type: 'chromite-e2e:response',
-      requestId: data.requestId,
-      ok: false,
-      error: error?.message ?? String(error)
-    }, '*')
   }
+
+  void handleRequest()
 })
