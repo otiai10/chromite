@@ -6,3 +6,4 @@ coverage
 
 # Editor
 .vscode
+.claude/settings.local.json
