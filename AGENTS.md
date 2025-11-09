@@ -1,5 +1,7 @@
 # Repository Guidelines
 
+IMPORTANT: Commit messages must be in English.
+
 ## Project Structure & Module Organization
 TypeScript sources live in `src/`, and release bundles are emitted to `lib/`. Add new public exports in `src/index.ts`; never edit `lib/` manually. Jest unit tests sit in `tests/spec/`, Puppeteer E2E scenarios in `tests/e2e/`, and coverage reports in `coverage/`. Follow the existing kebab-case directories and snake_case keys, checking `.vscode/` and `tsconfig.json` when you adjust tooling defaults.
 
