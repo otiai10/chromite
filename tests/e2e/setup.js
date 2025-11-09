@@ -8,13 +8,20 @@ const DIR = path.join(os.tmpdir(), 'jest_puppeteer_global_setup')
 
 module.exports = async function () {
   const extention = path.join(__dirname, 'app')
+  const args = [
+    `--disable-extensions-except=${extention}`,
+    `---load-extension=${extention}`
+  ]
+
+  // Add --no-sandbox flag in CI environments (e.g., GitHub Actions)
+  if (process.env.CI) {
+    args.push('--no-sandbox', '--disable-setuid-sandbox')
+  }
+
   const browser = await puppeteer.launch({
     headless: 'new',
     timeout: 0,
-    args: [
-      `--disable-extensions-except=${extention}`,
-      `---load-extension=${extention}`
-    ]
+    args
   })
 
   const background = await browser.waitForTarget(
