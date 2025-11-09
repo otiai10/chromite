@@ -60,12 +60,17 @@ router.on('/history/latest', async function (this: RouteContext) {
   return { status: 200, actions: [...recentActions] }
 })
 
-router.on('/page/highlight', async function (this: RouteContext, message: HighlightMessage, sender) {
+router.on('/page/highlight', async function (
+  this: RouteContext,
+  message: HighlightMessage,
+  sender: chrome.runtime.MessageSender
+) {
   remember(this)
-  if (sender?.tab?.id == null) {
+  const tabId = sender?.tab?.id
+  if (tabId == null) {
     return { status: 400, message: 'Tab id required' }
   }
-  const tabClient = Client.tab(sender.tab.id)
+  const tabClient = Client.tab(tabId)
   const response = await tabClient.send('/dom/render', {
     text: message.text ?? 'Chromite',
     color: message.color ?? '#ffeb3b'

@@ -10,7 +10,7 @@
     "build:e2e": "esbuild tests/e2e/app/src/background.ts --bundle --format=iife --platform=browser --target=chrome115 --outfile=tests/e2e/app/dist/background.js && esbuild tests/e2e/app/src/content.ts --bundle --format=iife --platform=browser --target=chrome115 --outfile=tests/e2e/app/dist/content.js",
     "test": "jest --config tests/spec/jest.config.ts",
     "test:e2e": "npm run build:e2e && jest --config tests/e2e/jest.config.ts",
-    "lint": "eslint src/*.ts tests/**/*.{ts,js}"
+    "lint": "eslint \"src/*.ts\" \"tests/**/*.{ts,js}\""
   },
   "repository": {
     "type": "git",
