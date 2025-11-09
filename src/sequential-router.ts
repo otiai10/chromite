@@ -8,16 +8,22 @@ import {
   DefaultResolver
 } from './router'
 
-// もういやや、TypeScriptの型パズル...
-export type ExtractCallbackSequential<T> =
-    T extends chrome.events.Event<infer U extends (...args: any[]) => any> ? (
-      stack: Array<Parameters<U>[0]>,
-      ...args: U extends (first: any, ...rest: infer V) => any ? V : never
-    ) => ReturnType<U> :
-        (T extends chrome.events.EventWithRequiredFilterInAddListener<infer V> ? (
-          stack: V extends (...args: any) => any ? Array<Parameters<V>[0]> : never,
-          ...args: V extends (first: any, ...rest: infer W) => any ? W : never
-        ) => V extends (...args: any[]) => any ? ReturnType<V> : never : never)
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type StackCallback<F extends Function> =
+  F extends (first: any, ...rest: infer V) => any ?
+      (stack: Array<Parameters<F>[0]>, ...args: V) => ReturnType<F>
+    : F extends (first: any) => any ?
+        (stack: Array<Parameters<F>[0]>) => ReturnType<F>
+      : never
+
+type EventTypes = chrome.events.Event<any> | chrome.webRequest.WebRequestEvent<any, any>
+
+export type ExtractCallbackSequential<T extends EventTypes> =
+  T extends chrome.events.Event<infer U> ?
+    StackCallback<U>
+    : T extends chrome.webRequest.WebRequestEvent<infer U, any> ?
+      StackCallback<U>
+      : never
 
 const WildCard = '*'
 
@@ -83,7 +89,8 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
   public listener (): ExtractCallback<T> {
     return ((...args: Parameters<ExtractCallback<T>>) => {
       const sendResponse = this.sendResponse(...args)
-      this.resolver(...args).then(route => {
+      const resolved = this.resolver(...args);
+      (resolved instanceof Promise ? resolved : Promise.resolve(resolved)).then(route => {
         this.pool.push({ [ActionKey]: route[ActionKey], data: args[0] })
         const [fn, len] = this.findHandler(this.pool.slice(-this.length))
         const stacked = this.pool.map(e => e.data).slice(-len) as Array<Parameters<ExtractCallbackSequential<T>>[0]>

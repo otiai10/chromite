@@ -1,23 +1,27 @@
 import { SequentialRouter } from '../../src/sequential-router'
 
+type RuntimeMessageEvent = typeof chrome.runtime.onMessage
+
 describe('SequentialRouter', () => {
   it('should register a route', async () => {
-    const r = new SequentialRouter(4, async (m: any) => await Promise.resolve({ __action__: m.action }))
+    const r = new SequentialRouter<RuntimeMessageEvent>(4, async (m: any) => await Promise.resolve({ __action__: m.action }))
     const c = jest.fn().mockName('callback')
     r.on(['/precommit', '/commit'], c)
     const listen = r.listener()
-    const s = jest.fn().mockName('sendResponse')
-    listen({ action: '/unused', hash: 'aaa' }, { tabId: 123 }, s)
-    listen({ action: '/precommit', hash: 'xxx' }, { tabId: 123 }, s)
-    expect(s).not.toBeCalled()
-    listen({ action: '/commit', hash: 'yyy' }, { tabId: 123 }, s)
+    const sendResponse = jest.fn().mockName('sendResponse')
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const sender = { tab: { id: 123 } } as chrome.runtime.MessageSender
+    listen({ action: '/unused', hash: 'aaa' }, sender, sendResponse)
+    listen({ action: '/precommit', hash: 'xxx' }, sender, sendResponse)
+    expect(sendResponse).not.toBeCalled()
+    listen({ action: '/commit', hash: 'yyy' }, sender, sendResponse)
     await new Promise((resolve) => setTimeout(resolve, 0))
-    expect(s).toBeCalled()
+    expect(sendResponse).toBeCalled()
     expect(c).toBeCalled()
     expect(c).toBeCalledTimes(1)
     expect(c).toBeCalledWith([
       { action: '/precommit', hash: 'xxx' },
       { action: '/commit', hash: 'yyy' }
-    ], { tabId: 123 }, s)
+    ], { tab: { id: 123 } }, sendResponse)
   })
 })

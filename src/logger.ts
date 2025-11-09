@@ -1,3 +1,6 @@
+/**
+ * Enumerates the severity levels supported by the logger.
+ */
 export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
@@ -5,15 +8,57 @@ export enum LogLevel {
   ERROR = 3,
 }
 
+const defaultEmojiDict: Record<LogLevel, string> = {
+  [LogLevel.DEBUG]: '🐞',
+  [LogLevel.INFO]: '💡',
+  [LogLevel.WARN]: '⚠️',
+  [LogLevel.ERROR]: '🚨'
+}
+
+const defaultStyleDict: Record<LogLevel, string> = {
+  [LogLevel.DEBUG]: 'color:WHITE; background-color:CORAL; font-weight:BOLD;',
+  [LogLevel.INFO]: 'color:WHITE; background-color:GREY;  font-weight:BOLD;',
+  [LogLevel.WARN]: 'color:BLACK; background-color:GOLD;  font-weight:BOLD;',
+  [LogLevel.ERROR]: 'color:WHITE; background-color:RED;   font-weight:BOLD;'
+}
+
+/**
+ * Lightweight console logger that caches instances per project name and
+ * shares global visual configuration.
+ */
 export class Logger {
+  private static readonly nullProjectKey = Symbol('logger:null-project')
+  private static readonly registry = new Map<string | symbol, Logger>()
+
+  private static readonly emojiConfig: {
+    enabled: boolean
+    dict: Record<LogLevel, string>
+  } = {
+      enabled: false,
+      dict: { ...defaultEmojiDict }
+    }
+
+  private static readonly styleConfig: {
+    enabled: boolean
+    dict: Record<LogLevel, string>
+  } = {
+      enabled: true,
+      dict: { ...defaultStyleDict }
+    }
+
   public static global: {
     _level: LogLevel
     level: (level: LogLevel) => void
     // _format: string;
   } = {
       _level: LogLevel.INFO,
+      /**
+       * @internal Legacy setter kept for backward compatibility.
+       * @param l Desired log level. Use {@link Logger.setLevel} instead.
+       * @returns void
+       */
       level (l: LogLevel) {
-        this._level = l
+        Logger.setLevel(l)
       }
     }
 
@@ -22,79 +67,148 @@ export class Logger {
     public level: LogLevel = Logger.global._level
   ) { }
 
-  public readonly emoji: {
-    enabled: boolean
-    dict: Record<LogLevel, string>
-  } = {
-      enabled: false,
-      dict: {
-        [LogLevel.DEBUG]: '🐞',
-        [LogLevel.INFO]: '💡',
-        [LogLevel.WARN]: '⚠️',
-        [LogLevel.ERROR]: '🚨'
+  /**
+   * Retrieves a logger for the specified project, creating and caching it on first access.
+   * @param project Project label used in log headers. `null` represents anonymous output.
+   * @param options Optional overrides such as the initial {@link LogLevel}.
+   * @returns Cached or newly created {@link Logger} instance for the project.
+   */
+  public static get (project: string | null, options?: { level?: LogLevel }): Logger {
+    const key = project ?? Logger.nullProjectKey
+    const existing = Logger.registry.get(key)
+    if (existing != null) {
+      if (options?.level != null) existing.setLevel(options.level)
+      return existing
+    }
+    const instance = new Logger(project, options?.level ?? Logger.global._level)
+    Logger.registry.set(key, instance)
+    return instance
+  }
+
+  /**
+   * Updates the log level of all registered loggers at once.
+   * @param level Desired {@link LogLevel} threshold.
+   * @returns void
+   */
+  public static setLevel (level: LogLevel): void {
+    Logger.global._level = level
+    Logger.registry.forEach(logger => {
+      logger.level = level
+    })
+  }
+
+  /**
+   * Applies global emoji settings that affect every logger instance.
+   * @param dict Emoji dictionary to enable and customize emojis. Pass `false` to disable, `true` to enable with defaults, or pass a partial dictionary to customize.
+   * @returns void
+   */
+  public static setEmoji (enabled: boolean): void
+  public static setEmoji (dict: Partial<Record<LogLevel, string>>): void
+  public static setEmoji (dict: Partial<Record<LogLevel, string>> | boolean): void {
+    if (dict === false) {
+      Logger.emojiConfig.enabled = false
+      return
+    }
+    Logger.emojiConfig.enabled = true
+    if (dict === true || dict == null) {
+      Logger.emojiConfig.dict = { ...defaultEmojiDict }
+    } else {
+      Logger.emojiConfig.dict = {
+        ...defaultEmojiDict,
+        ...dict
       }
     }
+  }
 
-  public readonly style: {
-    enabled: boolean
-    dict: Record<LogLevel, string>
-  } = {
-      enabled: true,
-      dict: {
-        [LogLevel.DEBUG]: 'color:WHITE; background-color:CORAL; font-weight:BOLD;',
-        [LogLevel.INFO]: 'color:WHITE; background-color:GREY;  font-weight:BOLD;',
-        [LogLevel.WARN]: 'color:BLACK; background-color:GOLD;  font-weight:BOLD;',
-        [LogLevel.ERROR]: 'color:WHITE; background-color:RED;   font-weight:BOLD;'
+  /**
+   * Applies global CSS styles used by console formatting.
+   * @param dict Style dictionary to enable and customize styles. Pass `false` to disable, `true` to enable with defaults, or pass a partial dictionary to customize.
+   * @returns void
+   */
+  public static setStyle (enabled: boolean): void
+  public static setStyle (dict: Partial<Record<LogLevel, string>>): void
+  public static setStyle (dict: Partial<Record<LogLevel, string>> | boolean): void {
+    if (dict === false) {
+      Logger.styleConfig.enabled = false
+      return
+    }
+    Logger.styleConfig.enabled = true
+    if (dict === true || dict == null) {
+      Logger.styleConfig.dict = { ...defaultStyleDict }
+    } else {
+      Logger.styleConfig.dict = {
+        ...defaultStyleDict,
+        ...dict
       }
     }
+  }
 
-  public setLevel (level: LogLevel): Logger {
+  /**
+   * Updates the threshold for this specific logger instance.
+   * @param level Desired {@link LogLevel}.
+   * @returns The current {@link Logger} for chaining.
+   */
+  public setLevel (level: LogLevel): this {
     this.level = level
     return this
   }
 
-  public setEmoji (enabled: boolean, dict: Record<LogLevel, string>): Logger {
-    this.emoji.enabled = enabled
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    Object.keys(LogLevel).map(k => (dict[k] ? (this.emoji.dict[k] = dict[k]) : null))
-    return this
-  }
-
-  public setStyle (enabled: boolean, dict: Record<LogLevel, string>): Logger {
-    this.style.enabled = enabled
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    Object.keys(LogLevel).map(k => (dict[k] ? (this.style.dict[k] = dict[k]) : null))
-    return this
-  }
-
+  /**
+   * Emits a message at DEBUG level.
+   * @param args Arbitrary arguments forwarded to `console.debug`.
+   * @returns void
+   */
   public debug (...args: unknown[]): void {
     if (this.level > LogLevel.DEBUG) return
     const _a = this.format(LogLevel.DEBUG, args)
     console.debug(..._a)
   }
 
+  /**
+   * Emits a message at INFO level.
+   * @param args Arbitrary arguments forwarded to `console.info`.
+   * @returns void
+   */
   public info (...args: unknown[]): void {
     if (this.level > LogLevel.INFO) return
     const _a = this.format(LogLevel.INFO, args)
     console.info(..._a)
   }
 
+  /**
+   * Emits a message at WARN level.
+   * @param args Arbitrary arguments forwarded to `console.warn`.
+   * @returns void
+   */
   public warn (...args: unknown[]): void {
     if (this.level > LogLevel.WARN) return
     const _a = this.format(LogLevel.WARN, args)
     console.warn(..._a)
   }
 
+  /**
+   * Emits a message at ERROR level.
+   * @param args Arbitrary arguments forwarded to `console.error`.
+   * @returns void
+   */
   public error (...args: unknown[]): void {
     if (this.level > LogLevel.ERROR) return
     const _a = this.format(LogLevel.ERROR, args)
     console.error(..._a)
   }
 
+  /**
+   * Builds the console arguments array with headers and styling metadata.
+   * @param level Log level the message is associated with.
+   * @param args Original arguments supplied to the logger API.
+   * @returns Array passed directly to the corresponding `console` method.
+   */
   private format (level: LogLevel, args: unknown[]): unknown[] {
     const label = LogLevel[level]
-    const head = (this.project == null ? '' : `(${this.project}) `) + `${this.emoji.enabled ? `${this.emoji.dict[level]} ` : ''}%c[${label}]`
-    const style = this.style.enabled ? this.style.dict[level] : ''
-    return [head, style, ...args]
+    const emoji = Logger.emojiConfig
+    const style = Logger.styleConfig
+    const head = (this.project == null ? '' : `(${this.project}) `) + `${emoji.enabled ? `${emoji.dict[level]} ` : ''}%c[${label}]`
+    const styleText = style.enabled ? style.dict[level] : ''
+    return [head, styleText, ...args]
   }
 }

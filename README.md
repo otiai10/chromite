@@ -1,4 +1,4 @@
-# chromite - Chrome Extension Messaging Routing Kit
+# chromite — Chrome Extension Messaging Routing Kit
 
 [![version](https://img.shields.io/npm/v/chromite)](https://www.npmjs.com/package/chromite)
 [![downloads](https://img.shields.io/npm/dt/chromite)](https://www.npmjs.com/package/chromite)
@@ -7,146 +7,109 @@
 [![codecov](https://codecov.io/github/otiai10/chromite/branch/main/graph/badge.svg?token=wAWd6Vhy4j)](https://codecov.io/github/otiai10/chromite)
 [![Maintainability](https://api.codeclimate.com/v1/badges/920634c9e31e0df99677/maintainability)](https://codeclimate.com/github/otiai10/chromite/maintainability)
 
+Chromite streamlines Chrome extension messaging by giving you familiar routing,
+request handling, and logging primitives. Instead of wiring every message in a
+single `onMessage` listener, compose controllers, share request clients, and
+format logs with a consistent API.
 
-* Use `Router` to simplify your `onMessage` event listener routing
-* Use `Client` as a shorthand for `sendMessage`
-* Use `Logger` for decorating `console.log` with intuitive interface
+## Features
 
-to write your Chrome Extension in the way of Web Application Development.
+- Route extension messages with path patterns and controller handlers.
+- Use a client abstraction to send structured messages without manual payloads.
+- Decorate `console` output with leveled, namespaced logging.
+- Ship TypeScript types and modern build artifacts out of the box.
 
-# Why?
+## Installation
 
-[`Message Passing`](https://developer.chrome.com/docs/extensions/mv3/messaging/) plays a crucial role in the development of Chrome extensions. Therefore, as Chrome extensions become more feature-rich, the variety of messages being sent and received between the `background` and other contexts increases. Managing all of this within a single `onMessage.addListener` and dispatching to different handlers can make the code quite **messy**.
-
-Which is like this:
-
-```javascript
-// This is what we do usually... 😰
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-  switch (message.action) {
-    case '/users/list':
-      const users = await Users.getAll()
-      sendResponse({ users });
-      break;
-    case '/users/get':
-      const user = await Users.get(message.userId);
-      sendResponse({ user });
-      break;
-    case '/users/update':
-      const user = Users.get(message.userId)
-      // more your code here...
-      break;
-    default:
-      sendResponse({ message: "Not Found..." });
-  }
-  return true;
-});
+```bash
+npm install chromite
+# or
+yarn add chromite
 ```
 
-This is very similar to what we write when we build a web application and routing HTTP request. Then, if we organize the code in that manner, we can create a Chrome extension source code that is more comprehensible and maintainable.
+Chromite targets modern Chromium-based extensions (Manifest V3). Pair it with
+TypeScript for the best DX.
 
-# Router
+## Quick Start
 
-Specifically, it would look like this:
+```ts
+import { Router, Client, Logger, LogLevel } from "chromite";
 
-```javascript
 const router = new Router();
 
-router.on("/users/list", ListUsersController);
-router.on("/users/{id}", GetUserController);
-router.on("/users/{id}/update", UpdateUserController);
-router.onNotFound(NotFoundController);
+router.on("/users/list", async () => {
+  return { users: await Users.getAll() };
+});
+
+router.on("/users/{id}", async function () {
+  const user = await Users.get(this.id);
+  return { user };
+});
+
+router.onNotFound(() => ({ message: "Not found" }));
 
 chrome.runtime.onMessage.addListener(router.listener());
-// Simple! 🤗
-```
 
-then one of your controllers will look like this:
-
-```javascript
-async function ListUsersController(message, sender) {
-    const users = await Users.getAll();
-    return { users }; // You don't even need sendResponse
-}
-
-async function GetUserController(this: {id: string}, message, sender) {
-    // You can retrieve path parameter from `this` arg
-    const user = await Users.get(this.id);
-    return { user };
-}
-```
-
-this will make our life easier.
-
-Then simply you can send message to this listener like this:
-
-```javascript
-const users = await chrome.runtime.sendMessage({action: '/users/list'});
-// Nothing different to whant we do usually.
-```
-
-# Client
-
-In case you need some shorthand to send message, which might be a HTTP client in web application, there is `Client` you can use and you can avoid using `action` field in your message.
-
-```javascript
 const client = new Client(chrome.runtime);
+const logger = Logger.get("chromite-demo", { level: LogLevel.INFO });
 
-// path (=action) only
-const users = await client.send('/users/list');
-
-// path with request body
-const updated = await client.send(`/users/${id}/update`, {name: "otiai20"});
+const users = await client.send("/users/list");
+logger.info("Loaded users", users);
 ```
 
-# ActiveRecord?
+### Logger tips
 
-Now you might want something like `ActiveRecord` to access and OR-mapping `chrome.storage`.
-There is a separated package: `jstorm` - JavaScript ORM for `chrome.storage` and `LocalStorage`.
+```ts
+// Reuse the same logger for a project namespace.
+const logger = Logger.get("popup");
 
-https://github.com/otiai10/jstorm
+// Raise verbosity for every registered logger.
+Logger.setLevel(LogLevel.DEBUG);
 
-Small example:
+// Tweak shared visual configuration.
+Logger.setEmoji({
+  [LogLevel.INFO]: "✨"
+});
+Logger.setStyle({
+  [LogLevel.ERROR]: "color:white; background-color:#d93025; font-weight:bold;"
+});
 
-```javascript
-// This uses window.sessionStorage
-import { Model } from "jstorm/browser/session";
-
-class User extends Model {
-  public name: string;
-  public age:  number;
-}
-
-(async () => {
-  const otiai10 = User.new({name:"otiai10"});
-  (otiai10._id) // null, yes
-  await otiai10.save();
-  (otiai10._id) // NOT null, because saved
-
-  const found = await User.find(otiai10._id);
-  (found._id == otiai10._id) // true
-
-  otiai10.delete();
-})();
-
+logger.error("Failed to fetch", { status: 500 });
 ```
 
-# Logger
+## Core Concepts
 
-Last but not least, logging is also important for us. Even though we know we can customize `console.log` by `%c` decorator, it would be messy if we do that all the time. `Logger` is just a memorandum for that decoration, or we can just use like following:
+- **Router**: Registers path-based handlers and resolves parameters before
+  delegating to controllers.
+- **Client**: Wraps `chrome.runtime.sendMessage` with promise-based ergonomics.
+- **Logger**: Formats messages with namespaced prefixes and log levels for
+  easier debugging.
 
-```javascript
-import {Logger, LogLevel} from "chromite";
+See [`src/`](./src) for the TypeScript source and [`lib/`](./lib) for compiled
+artifacts published to npm.
 
-const logger = new Logger("your_project", LogLevel.ERROR);
+## Development Workflow
 
-logger.warn("hello", 100, {name: "otiai10"});
-// prints nothing because level is set to "ERROR"
+- `npm run clean` — remove build output for a fresh compilation.
+- `npm run build` — compile TypeScript and emit declarations.
+- `npm run lint` — run ESLint (`standard-with-typescript`) on source and tests.
+- `npm run test` — execute Jest unit tests in `tests/spec/`.
+- `npm run test:e2e` — rebuild the demo extension and launch Puppeteer suites.
 
-// This prints these messages with colored prefix "[ERROR]"
-logger.error("hey", {code: 500, msg: ["some", "problem"]});
-```
+End-to-end fixtures live in `tests/e2e/`, and coverage reports land in
+`coverage/`.
 
-# Issues
+## Contributing
 
-- https://github.com/otiai10/chromite/issues/new
+Chromite follows Japanese Conventional Commits and documents required review
+steps in [AGENTS.md](./AGENTS.md). Before opening a pull request:
+
+1. Run the lint and test commands listed above (include logs in the PR).
+2. Verify documentation changes stay consistent with the rest of the repo.
+3. Provide context for any manifest or permission updates.
+
+Issues and feature requests are welcome through GitHub Discussions or Issues.
+
+## License
+
+MIT © otiai10
