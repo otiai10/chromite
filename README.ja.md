@@ -73,8 +73,41 @@ logger.error("Failed to fetch", { status: 500 });
 ## コアコンセプト
 
 - **Router**: パスを解析し、パラメータを解決してからコントローラへ委譲。
+- **SequentialRouter**: Router と似ているが、イベント履歴を保持するため、連続したリクエストの追跡に便利（例: `webRequest` API）。
 - **Client**: `chrome.runtime.sendMessage` を Promise ベースで安全に呼び出し。
 - **Logger**: 名前空間とレベル付きで `console` 出力を整形。
+
+### 応用: Chrome イベントでの SequentialRouter の使用
+
+`webRequest` などの Chrome イベントを扱う場合は、`typeof` でイベント型を指定します:
+
+```ts
+import { SequentialRouter } from "chromite";
+
+const router = new SequentialRouter<typeof chrome.webRequest.onBeforeRequest>(
+  2,
+  async (details) => {
+    const url = new URL(details.url);
+    return { __action__: url.pathname };
+  }
+);
+
+router.on(["/api/users"], async (stack) => {
+  // stack には直近2件のイベントが含まれます
+  console.log("Request history:", stack);
+});
+
+chrome.webRequest.onBeforeRequest.addListener(
+  router.listener(),
+  { urls: ["*://example.com/*"] },
+  ["requestBody"]
+);
+```
+
+このパターンは以下のような任意の Chrome イベント型で使用できます:
+- `typeof chrome.runtime.onMessage`
+- `typeof chrome.tabs.onActivated`
+- `typeof chrome.webRequest.onCompleted`
 
 ## 開発フロー
 

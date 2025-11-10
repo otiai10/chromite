@@ -1,6 +1,4 @@
-import { type Config } from '@jest/types'
-
-const config: typeof Config = {
+const config = {
   rootDir: '../../',
   testMatch: ['<rootDir>/tests/spec/*.spec.ts'],
   preset: 'ts-jest',

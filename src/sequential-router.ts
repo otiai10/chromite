@@ -16,8 +16,10 @@ export type StackCallback<F extends Function> =
         (stack: Array<Parameters<F>[0]>) => ReturnType<F>
       : never
 
+// EventTypes is the same as RoutingTargetEvent: chrome.events.Event or chrome.webRequest.WebRequestEvent
 type EventTypes = chrome.events.Event<any> | chrome.webRequest.WebRequestEvent<any, any>
 
+// ExtractCallbackSequential extracts the callback from an Event and wraps it in StackCallback
 export type ExtractCallbackSequential<T extends EventTypes> =
   T extends chrome.events.Event<infer U> ?
     StackCallback<U>

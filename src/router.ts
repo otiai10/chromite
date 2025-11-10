@@ -4,9 +4,17 @@ export type Resolved<U = Record<string, unknown>> = {
   [ActionKey]: string
 } & U
 
-// type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : never
-export type RoutingTargetEvent = chrome.events.Event<(...args: any[]) => any> | chrome.webRequest.WebRequestEvent<(...args: any[]) => any, string[]>
-export type ExtractCallback<T> = T extends chrome.events.Event<infer U> ? U : (T extends chrome.webRequest.WebRequestEvent<infer V, any> ? V : never)
+// RoutingTargetEvent accepts chrome.events.Event or chrome.webRequest.WebRequestEvent
+// Expected to be used with types like `typeof chrome.runtime.onMessage` or `typeof chrome.webRequest.onBeforeRequest`
+export type RoutingTargetEvent =
+  | chrome.events.Event<(...args: any[]) => any>
+  | chrome.webRequest.WebRequestEvent<(...args: any[]) => any, string[]>
+
+// ExtractCallback extracts the callback type from an Event
+export type ExtractCallback<T> =
+  T extends chrome.events.Event<infer U> ? U
+    : T extends chrome.webRequest.WebRequestEvent<infer V, string[]> ? V
+      : never
 export type HandlerOf<Callback extends (...args: any[]) => any> = (...args: Parameters<Callback>) => (Promise<any | undefined> | undefined)
 export type Resolver<Callback extends (...args: any[]) => any, U = Record<string, unknown>> = (...args: Parameters<Callback>) => (Resolved<U> | Promise<Resolved<U>>)
 

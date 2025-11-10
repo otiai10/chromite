@@ -81,9 +81,44 @@ logger.error("Failed to fetch", { status: 500 });
 
 - **Router**: Registers path-based handlers and resolves parameters before
   delegating to controllers.
+- **SequentialRouter**: Similar to Router but maintains a history of events,
+  useful for sequential request tracking (e.g., `webRequest` API).
 - **Client**: Wraps `chrome.runtime.sendMessage` with promise-based ergonomics.
 - **Logger**: Formats messages with namespaced prefixes and log levels for
   easier debugging.
+
+### Advanced: Using SequentialRouter with Chrome Events
+
+When working with Chrome events like `webRequest`, use `typeof` to specify the
+event type:
+
+```ts
+import { SequentialRouter } from "chromite";
+
+const router = new SequentialRouter<typeof chrome.webRequest.onBeforeRequest>(
+  2,
+  async (details) => {
+    const url = new URL(details.url);
+    return { __action__: url.pathname };
+  }
+);
+
+router.on(["/api/users"], async (stack) => {
+  // stack contains the last 2 events
+  console.log("Request history:", stack);
+});
+
+chrome.webRequest.onBeforeRequest.addListener(
+  router.listener(),
+  { urls: ["*://example.com/*"] },
+  ["requestBody"]
+);
+```
+
+This pattern works with any Chrome event type, including:
+- `typeof chrome.runtime.onMessage`
+- `typeof chrome.tabs.onActivated`
+- `typeof chrome.webRequest.onCompleted`
 
 See [`src/`](./src) for the TypeScript source and [`lib/`](./lib) for compiled
 artifacts published to npm.
