@@ -33,6 +33,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # This is needed for OIDC trusted publishing to npm
+      # @see https://github.com/orgs/community/discussions/173102
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
+
       - name: Build package
         run: pnpm run build
 
@@ -65,4 +70,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish to npm
-        run: pnpm publish --provenance --no-git-checks
+        run: pnpm publish --no-git-checks
