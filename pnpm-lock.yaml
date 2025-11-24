@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.27
-        version: 0.1.27
+        version: 0.1.31
       '@types/jest':
         specifier: ^27.5.2
         version: 27.5.2
@@ -609,20 +609,20 @@ packages:
   '@types/chrome@0.0.114':
     resolution: {integrity: sha512-i7qRr74IrxHtbnrZSKUuP5Uvd5EOKwlwJq/yp7+yTPihOXnPhNQO4Z5bqb1XTnrjdbUKEJicaVVbhcgtRijmLA==}
 
-  '@types/chrome@0.1.27':
-    resolution: {integrity: sha512-pkkCb0Ft8X+Igi751POzT+YqchSxUCtB6s4Gs6ttgSj8qzJga/qlJMgSW1mKxuQTW4i0sTqQbqVtzXDS5AU+4A==}
+  '@types/chrome@0.1.31':
+    resolution: {integrity: sha512-8fC9t02LRdqlSQ9bktaiLjP0NKujPNPaCKPfXxfIjZ35A9u831XY0pt0UEf2oup2SjcUEAaIYOB8mzJ51jhjmA==}
 
-  '@types/filesystem@0.0.32':
-    resolution: {integrity: sha512-Yuf4jR5YYMR2DVgwuCiP11s0xuVRyPKmz8vo6HBY3CGdeMj8af93CFZX+T82+VD1+UqHOxTq31lO7MI7lepBtQ==}
+  '@types/filesystem@0.0.36':
+    resolution: {integrity: sha512-vPDXOZuannb9FZdxgHnqSwAG/jvdGM8Wq+6N4D/d80z+D4HWH+bItqsZaVRQykAn6WEVeEkLm2oQigyHtgb0RA==}
 
-  '@types/filewriter@0.0.29':
-    resolution: {integrity: sha512-BsPXH/irW0ht0Ji6iw/jJaK8Lj3FJemon2gvEqHKpCdDCeemHa+rI3WBGq5z7cDMZgoLjY40oninGxqk+8NzNQ==}
+  '@types/filewriter@0.0.33':
+    resolution: {integrity: sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g==}
 
   '@types/graceful-fs@4.1.6':
     resolution: {integrity: sha512-Sig0SNORX9fdW+bQuTEovKj3uHcUL6LQKbCrrqb1X7J6/ReAbhCXRAhc+SMejhLELFj2QcyuxmUooZ4bt5ReSw==}
 
-  '@types/har-format@1.2.11':
-    resolution: {integrity: sha512-T232/TneofqK30AD1LRrrf8KnjLvzrjWDp7eWST5KoiSzrBfRsLrWDPk4STQPW4NZG6v2MltnduBVmakbZOBIQ==}
+  '@types/har-format@1.2.16':
+    resolution: {integrity: sha512-fluxdy7ryD3MV6h8pTfTYpy/xQzCFC7m89nOH9y94cNqJ1mDIDPut7MnRHI3F6qRmh/cT2fUjG1MLdCNb4hE9A==}
 
   '@types/istanbul-lib-coverage@2.0.4':
     resolution: {integrity: sha512-z/QT1XN4K4KYuslS23k62yDIDLwLFkzxOuMplDtObz0+y7VqJCaO2o+SPwHCvLFZh7xazvvoor2tA/hPz9ee7g==}
@@ -3611,25 +3611,25 @@ snapshots:
 
   '@types/chrome@0.0.114':
     dependencies:
-      '@types/filesystem': 0.0.32
-      '@types/har-format': 1.2.11
+      '@types/filesystem': 0.0.36
+      '@types/har-format': 1.2.16
 
-  '@types/chrome@0.1.27':
+  '@types/chrome@0.1.31':
     dependencies:
-      '@types/filesystem': 0.0.32
-      '@types/har-format': 1.2.11
+      '@types/filesystem': 0.0.36
+      '@types/har-format': 1.2.16
 
-  '@types/filesystem@0.0.32':
+  '@types/filesystem@0.0.36':
     dependencies:
-      '@types/filewriter': 0.0.29
+      '@types/filewriter': 0.0.33
 
-  '@types/filewriter@0.0.29': {}
+  '@types/filewriter@0.0.33': {}
 
   '@types/graceful-fs@4.1.6':
     dependencies:
       '@types/node': 18.19.130
 
-  '@types/har-format@1.2.11': {}
+  '@types/har-format@1.2.16': {}
 
   '@types/istanbul-lib-coverage@2.0.4': {}
 
