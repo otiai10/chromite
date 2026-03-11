@@ -20,7 +20,7 @@ export type Resolver<Callback extends (...args: any[]) => any, U = Record<string
 
 interface RouteMatcher<H, U = any> {
   match: (action: string) => Resolved<U> | undefined
-  handelr: () => H
+  handler: () => H
 }
 
 export const DefaultResolver = <U = any>(...args): Resolved<U> => {
@@ -71,7 +71,7 @@ export class Router<T extends RoutingTargetEvent, U = Record<string, unknown>> {
     if (!includesRegex) {
       return this.routes.exact.push({
         match: (a) => a === action ? { [ActionKey]: action } : undefined,
-        handelr: () => callback
+        handler: () => callback
       })
     }
     const str = '^' + '\\/' + segments.join('\\/') + '$'
@@ -82,15 +82,15 @@ export class Router<T extends RoutingTargetEvent, U = Record<string, unknown>> {
         if (m != null) return { [ActionKey]: action, ...m.groups }
         return undefined
       },
-      handelr: () => callback
+      handler: () => callback
     })
   }
 
   private findHandler (action: string): HandlerOf<ExtractCallback<T>> {
     const exact = this.routes.exact.find(r => r.match(action))
-    if (exact != null) return exact.handelr().bind({ route: exact.match(action) })
+    if (exact != null) return exact.handler().bind({ route: exact.match(action) })
     const regex = this.routes.regex.find(r => r.match(action))
-    if (regex != null) return regex.handelr().bind({ route: regex.match(action) })
+    if (regex != null) return regex.handler().bind({ route: regex.match(action) })
     return this.notfound.bind({ route: { [ActionKey]: action } })
   }
 
