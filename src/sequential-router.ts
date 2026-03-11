@@ -37,7 +37,7 @@ interface Entry<Data = unknown> {
 interface RouteSequentialMatcher<H, U = any> {
   actions: string[]
   match: (history: Entry[]) => Resolved<U> | undefined
-  handelr: () => H
+  handler: () => H
 }
 
 export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, unknown>> {
@@ -78,13 +78,13 @@ export class SequentialRouter<T extends RoutingTargetEvent, U = Record<string, u
         }
         return { [ActionKey]: actions }
       },
-      handelr: () => callback
+      handler: () => callback
     })
   }
 
   private findHandler (history: Entry[]): [HandlerOf<ExtractCallbackSequential<T>>, number] {
     const exact = this.routes.exact.find(r => r.match(history))
-    if (exact != null) return [exact.handelr().bind({ route: exact.match(history) }), exact.actions.length]
+    if (exact != null) return [exact.handler().bind({ route: exact.match(history) }), exact.actions.length]
     return [this.notfound.bind({ route: { [ActionKey]: history } }), this.length]
   }
 
